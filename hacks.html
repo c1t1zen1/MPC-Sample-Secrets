@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MPC Sample Underground</title>
+<meta name="description" content="MPC Sample mods, hacks and dev: RK3566 internals, firmware signing, root SSH over USB, RAM-only custom firmware, control-surface protocol, SysEx builder and a Web MIDI tester.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/mpc.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23e4002b'/%3E%3Crect x='6' y='6' width='9' height='9' rx='2' fill='%23ffb000'/%3E%3Crect x='17' y='6' width='9' height='9' rx='2' fill='%23111'/%3E%3Crect x='6' y='17' width='9' height='9' rx='2' fill='%23111'/%3E%3Crect x='17' y='17' width='9' height='9' rx='2' fill='%23111'/%3E%3C/svg%3E">
+<script src="assets/data.js" defer></script>
+<script src="assets/mpc.js" defer></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="index.html"><span class="brand-mark"><i></i><i></i><i></i><i></i></span><span><b>MPC<span>//</span>SAMPLE</b><small>SECRET GUIDEBOOK BIBLE</small></span></a>
+    <nav class="nav" aria-label="Guidebook pages">
+      <a href="index.html"><b>01</b>Cheat Sheet</a>
+      <a href="setup.html"><b>02</b>System Config</a>
+      <a href="deep.html"><b>03</b>Secret Manual</a>
+      <a href="hacks.html"><b>04</b>Underground</a>
+      <a href="sources.html"><b>05</b>Network</a>
+    </nav>
+    <button class="tb-btn" type="button" data-open-search>SEARCH<kbd>⌘K</kbd></button>
+    <button class="tb-btn menu-btn" type="button" aria-expanded="false">MENU</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="kicker"><span class="blink"></span>04 // THE UNDERGROUND · MODS · HACKS · DEV · DIY</div>
+    <h1 class="title glitch" data-text="THE UNDERGROUND">The <span class="r">Under</span>ground</h1>
+    <p class="lede">Under the plastic is a <strong>quad-core Rockchip Linux computer</strong>, and since September 2026 a small crew on MPC-Forums and GitHub has been mapping it: root shells over USB, the full panel protocol, and a from-scratch Sample Mode running from RAM. This page is the field guide, with every claim linked to the person who proved it.</p>
+    <div class="callout danger" style="max-width:900px;margin-top:16px"><b>Read before you touch anything</b>Everything here is unofficial and can void your warranty. The safe tier changes nothing on flash and a reboot returns the unit to stock, but a root shell can still damage the device. Back up your projects first. Never flash firmware from strangers, never share private keys or prepared SD cards, and don't redistribute Akai's binaries: every project linked here ships only its own code. Validated on <b>firmware 1.3.0.12</b> only.</div>
+  </section>
+
+  <div class="with-toc">
+    <aside class="toc" aria-label="On this page">
+      <b>// ON THIS PAGE</b>
+      <a href="#risk">Risk ladder</a>
+      <a href="#internals">Internals</a>
+      <a href="#firmware-anatomy">Firmware anatomy</a>
+      <a href="#ssh">Root SSH over USB</a>
+      <a href="#testapp">Test-app path</a>
+      <a href="#customfw">RAM-only firmware</a>
+      <a href="#patching">Patching &amp; boot menu</a>
+      <a href="#protocol">Panel protocol</a>
+      <a href="#sysex">SysEx builder</a>
+      <a href="#webmidi">Web MIDI tester</a>
+      <a href="#xpj">Project files &amp; tools</a>
+      <a href="#plugins">Hidden plugin host</a>
+      <a href="#hwmods">Hardware &amp; accessories</a>
+    </aside>
+    <div>
+
+      <section id="risk" class="section" style="padding-top:20px">
+        <div class="section-head"><span class="idx">4.1</span><h2 data-decrypt>Risk ladder</h2><p>Climb only as high as you need. Tiers 1–5 leave flash untouched (reboot = stock). Tier 6 is where bricks live.</p></div>
+        <div class="tbl-wrap rv"><table class="data">
+          <thead><tr><th>Tier</th><th>Access</th><th>Writes flash?</th><th>Risk</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="n">1</td><td>Web updater + USB-MIDI control</td><td>No</td><td><span class="risk" data-l="1"><i></i><i></i><i></i><i></i><i></i></span></td><td><span class="badge b-official">official</span></td></tr>
+            <tr><td class="n">2</td><td>Project/kit tools on your computer (.xpj)</td><td>No</td><td><span class="risk" data-l="1"><i></i><i></i><i></i><i></i><i></i></span></td><td><span class="badge b-verified">verified</span></td></tr>
+            <tr><td class="n">3</td><td>Root SSH via SD autorun (RAM-only)</td><td>No*</td><td><span class="risk" data-l="3"><i></i><i></i><i></i><i></i><i></i></span></td><td><span class="badge b-verified">verified, 1 unit</span></td></tr>
+            <tr><td class="n">4</td><td>Custom app in RAM via <code>systemd-run</code></td><td>No</td><td><span class="risk" data-l="3"><i></i><i></i><i></i><i></i><i></i></span></td><td><span class="badge b-verified">verified</span></td></tr>
+            <tr><td class="n">5</td><td>Byte-patched stock app, bind-mounted from RAM</td><td>No</td><td><span class="risk" data-l="4"><i></i><i></i><i></i><i></i><i></i></span></td><td><span class="badge b-experimental">scaffold</span></td></tr>
+            <tr><td class="n">6</td><td>Persistent firmware / rootfs mods</td><td><b>Yes</b></td><td><span class="risk" data-l="5"><i></i><i></i><i></i><i></i><i></i></span></td><td><span class="badge b-experimental">blocked by signing</span></td></tr>
+          </tbody></table></div>
+        <p class="small faint">*Normal OS activity can still write to <code>/data</code>. A root shell can write anywhere it wants; stay out of <code>/factory</code>. <a class="src" data-s="ssh"></a><a class="src" data-s="lab"></a></p>
+      </section>
+
+      <section id="internals" class="section">
+        <div class="section-head"><span class="idx">4.2</span><h2 data-decrypt>What's inside</h2><p>Model <b>AC50</b> on inMusic's <b>AZ07</b> platform, from firmware analysis and read-only inspection of live units.</p></div>
+        <div class="board card rv" style="padding:10px">
+          <svg viewBox="0 0 1000 520" role="img" aria-label="Block diagram of MPC Sample internals">
+            <path class="bus hot" d="M500 260 L500 120"/><path class="bus" d="M500 260 L200 120"/><path class="bus" d="M500 260 L800 120"/>
+            <path class="bus" d="M500 260 L170 300"/><path class="bus hot" d="M500 260 L830 300"/><path class="bus" d="M500 260 L250 440"/><path class="bus" d="M500 260 L750 440"/><path class="bus" d="M500 260 L500 455"/>
+            <rect class="chip-r core" x="400" y="210" width="200" height="100" rx="10"/>
+            <text class="ct" x="500" y="245" text-anchor="middle">Rockchip RK3566</text><text class="cs" x="500" y="265" text-anchor="middle">4× Cortex-A55 · 2 GB RAM, no swap</text><text class="cs" x="500" y="283" text-anchor="middle">Linux 6.12 PREEMPT_RT</text>
+            <rect class="chip-r" x="410" y="60" width="180" height="62" rx="8"/><text class="ct" x="500" y="86" text-anchor="middle">AK4558 codec</text><text class="cs" x="500" y="104" text-anchor="middle">I2S · fixed 44.1 kHz</text>
+            <text class="bl" x="508" y="180">I2S · 128-frame period (2.9 ms)</text>
+            <rect class="chip-r" x="90" y="60" width="220" height="62" rx="8"/><text class="ct" x="200" y="86" text-anchor="middle">ST7796S LCD</text><text class="cs" x="200" y="104" text-anchor="middle">320×240 · SPI · ~20 fps full frame</text>
+            <rect class="chip-r" x="690" y="60" width="220" height="62" rx="8"/><text class="ct" x="800" y="86" text-anchor="middle">Speaker · mic · jacks</text><text class="cs" x="800" y="104" text-anchor="middle">GPIO-switched amp, jack detect</text>
+            <rect class="chip-r" x="40" y="270" width="250" height="70" rx="8"/><text class="ct" x="165" y="297" text-anchor="middle">eMMC 7.3 GB</text><text class="cs" x="165" y="316" text-anchor="middle">12 partitions · dm-verity rootfs</text>
+            <rect class="chip-r" x="710" y="262" width="250" height="86" rx="8"/><text class="ct" x="835" y="290" text-anchor="middle">Panel MCU (STM32G0-class)</text><text class="cs" x="835" y="309" text-anchor="middle">pads · buttons · knobs · LEDs</text><text class="cs" x="835" y="327" text-anchor="middle">UART3 @ 4 Mbit/s, MIDI bytes</text>
+            <text class="bl" x="640" y="276">UART3</text>
+            <rect class="chip-r" x="120" y="420" width="260" height="70" rx="8"/><text class="ct" x="250" y="447" text-anchor="middle">USB-C gadget</text><text class="cs" x="250" y="466" text-anchor="middle">UAC2 audio · f_midi · NCM net</text>
+            <rect class="chip-r" x="620" y="420" width="260" height="70" rx="8"/><text class="ct" x="750" y="447" text-anchor="middle">TI bq fuel gauge</text><text class="cs" x="750" y="466" text-anchor="middle">serviced by the panel MCU (I2C)</text>
+            <rect class="chip-r" x="420" y="430" width="160" height="50" rx="8"/><text class="ct" x="500" y="452" text-anchor="middle">microSD</text><text class="cs" x="500" y="469" text-anchor="middle">/media/MPC SAMPLE · noexec</text>
+            <text class="cs" x="500" y="512" text-anchor="middle" style="fill:var(--ink-faint)">no Wi-Fi radio · Bluetooth UART disabled in the device tree</text>
+          </svg>
+        </div>
+        <div class="grid g2" style="margin-top:16px">
+          <div class="term rv">
+            <div class="term-bar"><i></i><i></i><i></i><span>software stack</span></div>
+<pre class="nocopy">U-Boot (inMusic build) · FIT signed <span class="c">sha256,rsa2048 key "akai-1"</span>
+ └─ kernel 6.12.60-rt (PREEMPT_RT) + dm-verity rootfs
+    └─ Yocto "AZ0x" 5.0.14 (scarthgap) · BusyBox · systemd
+       ├─ ac50.service
+       │   └─ launch-ac50 → az0x-firmware-tool <span class="c">(flashes panel MCU fw)</span>
+       │      └─ "/usr/bin/MPC Sample" <span class="c">119 MB AArch64 · JUCE 5.4.4</span>
+       ├─ az0x-webserver.service → /var/www/ac50 <span class="c">(updater UI)</span>
+       └─ sshd <span class="c">(installed, not started by default)</span></pre>
+          </div>
+          <div class="card rv">
+            <h3>Partition map</h3>
+            <p class="small"><code>spl1/2</code> · <code>env1/2</code> · <code>uboot1/2</code> (A/B redundancy) · <code>factory</code> <b>(never touch)</b> · <code>boot</code> · <code>recovery</code> · <code>rootfs</code> (dm-verity, any write breaks boot) · <code>content</code> (factory library) · <code>data</code> = <code>/var/lib</code> (your projects).</p>
+            <p class="small">The app opens ALSA <code>hw:</code> devices directly: <i>"Audio 44100Hz; 4-in; 4-out; 128 sample buffer"</i> (I2S stereo + USB stereo). There's no <code>amixer</code> on the device.</p>
+            <p class="small faint">Sources <a class="src" data-s="lab"></a><a class="src" data-s="labav"></a><a class="src" data-s="refw"></a></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="firmware-anatomy" class="section">
+        <div class="section-head"><span class="idx">4.3</span><h2 data-decrypt>Firmware anatomy</h2><p>Why you can't just edit the rootfs and reflash it.</p></div>
+        <div class="grid g2">
+          <div class="card rv">
+            <h3>The updater onion</h3>
+            <ol class="flow">
+              <li><b>Windows updater</b> = 7-Zip SFX (real archive at offset <code>0x34445</code>) holding <code>update.img</code>, <code>FirmwareUpdater.exe</code>, libusb and a <code>Config.json</code> that names the CHOP + MUTE + SAMPLE SELECT boot combo.</li>
+              <li><b><code>update.img</code></b>: an <code>AZ0x</code> container for product <code>AC50</code>: bootloader, recovery, boot and rootfs payloads (last three XZ-compressed ext images; rootfs ≈ 408 MiB).</li>
+              <li>The header holds a SHA-256 for every payload, and the header is <b>RSA-2048 signed</b> (PKCS#1 v1.5 over bytes <code>0x000–0x190</code>, key <code>akai-1</code>).</li>
+              <li>Edit a payload → its hash changes → the signature breaks → the updater refuses it. <b>Unpacking: solved. Repacking: blocked.</b></li>
+            </ol>
+            <p class="small faint"><a class="src" data-s="refw"></a><a class="src" data-s="re"></a></p>
+          </div>
+          <div class="card rv">
+            <h3>Tools (read-only)</h3>
+            <pre><span class="c"># jrold/MPC-Sample-RE: unpack an updater you downloaded yourself</span>
+python tools/extract_updater.py "MPC Sample 1.3.0 Updater.exe"
+python tools/parse_update_img.py work/updater/files/update.img
+python tools/scan_mpc_binary.py "rootfs/usr/bin/MPC Sample"
+
+<span class="c"># gospodindilly-ops/mpc-sample-lab</span>
+python tools/az0x.py Update.img      <span class="c"># parse/unpack AZ0x</span>
+python tools/rbin.py UpdateImage.rbin <span class="c"># panel MCU firmware</span></pre>
+            <p class="small">The panel MCU has its own image (<code>UpdateImage.rbin</code>, "!Rbn" blocks with CRC32 regions: bootloader 1.0.0.022, app 1.0.0.051). <a class="src" data-s="labproto"></a></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="ssh" class="section">
+        <div class="section-head"><span class="idx">4.4</span><h2 data-decrypt>Root SSH over USB</h2><p>By <b>puckcv</b> (MPC-Forums), packaged as <a data-href="ssh">orrpunk-art/mpc-sample-root-ssh</a>. It starts the OpenSSH server already on the device through the <b>stock SD autorun mechanism</b>. No flashing, no modified Akai binary.</p></div>
+        <div class="grid g2">
+          <div class="card rv">
+            <h3>How it works <span class="badge b-verified">verified</span> <span class="risk" data-l="3"><i></i><i></i><i></i><i></i><i></i></span></h3>
+            <ol class="flow">
+              <li>Download the release ZIP (v1.2.0 fixed a cold-boot hang). Read the scripts first.</li>
+              <li><code>sh setup_unix.sh</code> (or <code>setup_windows.ps1</code>) generates <b>your own</b> client key and a separate host key. No shared keys, no root password.</li>
+              <li>Copy the generated <code>autorun/</code> folder (<code>autorun.json</code>, <code>autorun.check</code>, <code>autorun.sh</code>, keys) to the root of an <b>exFAT</b> microSD.</li>
+              <li>Insert the card, connect USB-C data, wait up to ~45 s for USB networking.</li>
+              <li>SSH in. Config, keys and logs live in <code>/run</code> (RAM) and vanish at reboot.</li>
+            </ol>
+          </div>
+          <div>
+            <div class="term rv">
+              <div class="term-bar"><i></i><i></i><i></i><span>host → MPC (USB link)</span></div>
+<pre><span class="c"># on your computer, inside the extracted release</span>
+sh setup_unix.sh
+<span class="c"># → copy ./autorun to the SD root, boot the MPC with USB connected</span>
+ssh -p 2222 -i ~/.ssh/mpc_sample_client_ed25519 root@192.168.155.1
+id                     <span class="c"># uid=0(root)</span></pre>
+            </div>
+            <div class="term rv" style="margin-top:12px">
+              <div class="term-bar"><i></i><i></i><i></i><span>first look (read-only)</span></div>
+<pre>cat /etc/os-release
+uname -a
+systemctl status ac50.service --no-pager
+df -h; ls "/media/MPC SAMPLE"
+<span class="c"># copy a file in without sftp (none installed)</span>
+ssh -p 2222 -i ~/.ssh/mpc_sample_client_ed25519 root@192.168.155.1 'cat &gt; /run/tool' &lt; tool</pre>
+            </div>
+          </div>
+        </div>
+        <div class="callout small rv"><b>Gotchas</b>SSH is key-only and bound to the USB address. Pulling the card doesn't stop a running server; reboot does. Booting <i>without</i> the card = stock. The SD is mounted <code>noexec</code>, so binaries run only from <code>/run</code> or <code>/tmp</code>. Validated on one unit at 1.3.0.12 (two cold boots); other firmware is untested. <a class="src" data-s="ssh"></a><a class="src" data-s="sshrel"></a><a class="src" data-s="lab"></a></div>
+        <div class="callout info small rv"><b>Two autorun stories</b>The verified mechanism is <code>autorun/autorun.json</code> + <code>autorun.check</code> at the SD root, checksummed with a firmware-specific salt. The patcher project describes a different "Script detected: do you want to run it?" prompt for <code>scripts/autorun</code>; mpc-sample-lab notes that path doesn't match the verified one. <a class="src" data-s="patcher"></a><a class="src" data-s="lab"></a></div>
+      </section>
+
+      <section id="testapp" class="section">
+        <div class="section-head"><span class="idx">4.5</span><h2 data-decrypt>The factory test-app path</h2></div>
+        <div class="grid g2">
+          <div class="card rv">
+            <h3>What's in the stock image <span class="badge b-experimental">unconfirmed on AC50</span></h3>
+            <ul class="small">
+              <li><code>/usr/bin/test-app-launcher</code> and an enabled <code>az0x-webserver</code> with <b>web auth disabled</b> in the AC50 config.</li>
+              <li>A multipart upload form at <code>http://192.168.155.1/testapp</code> (field <code>file</code>) whose config stops <code>ac50</code> and runs <code>test-app-launcher --testapp-path=…</code>.</li>
+              <li>The launcher parses inMusic's V2 package schema, and both signed and <b>unsigned</b> code paths are compiled in. The same schema accepted unsigned packages on sibling inMusic Engine OS hardware.</li>
+              <li>Never upload a test package to <code>/software-update</code>: that endpoint wants a signed firmware image.</li>
+            </ul>
+            <p class="small faint"><a class="src" data-s="redev"></a><a class="src" data-s="prime4"></a></p>
+          </div>
+          <div class="term rv">
+            <div class="term-bar"><i></i><i></i><i></i><span>manifest.yaml (experimental probe, from MPC-Sample-RE)</span></div>
+<pre>testApps:
+  - version: 0.1.0
+    osVersionID: scarthgap
+    products:
+      - AC50
+    signedImage: False
+    basePath: test-apps/ac50
+    relativeExePath: AC50TestApp
+    launcher-XXXXXX: MPCSampleRE
+    name: MPC Sample RE Probe</pre>
+          </div>
+        </div>
+      </section>
+
+      <section id="customfw" class="section">
+        <div class="section-head"><span class="idx">4.6</span><h2 data-decrypt>RAM-only custom firmware</h2><p><a data-href="lab">mpc-sample-lab</a> rebuilt <b>Sample Mode from the manual</b> as a ~100 KB static AArch64 binary. It runs instead of the stock app and never writes flash.</p></div>
+        <div class="facts rv">
+          <div class="fact"><b>8×16</b><span>pads, 32 voices</span></div>
+          <div class="fact"><b>3.3%</b><span>of one core</span></div>
+          <div class="fact"><b>124 µs</b><span>render of 2902 µs budget</span></div>
+          <div class="fact"><b>0</b><span>underruns</span></div>
+          <div class="fact"><b>37 MB</b><span>RSS</span></div>
+          <div class="fact"><b>~100 KB</b><span>binary (zig cc)</span></div>
+        </div>
+        <div class="grid g2" style="margin-top:16px">
+          <div class="card rv">
+            <h3>Stage 1 implements</h3>
+            <p class="small">Envelopes, tune, mono/poly, mute groups, loop, reverse, Note On; B1–B3 pages, K1–K3, encoder, fader (pad volume); LEDs; waveform + envelope display. Loads the first 128 WAVs (44.1 kHz) of a folder onto banks A–H. Next on the roadmap: filter, Chop, 16 Levels, browser, recording, sequencer, FX. <a class="src" data-s="labroad"></a></p>
+            <pre>cd firmware &amp;&amp; make test   <span class="c"># host self-test, ASan/UBSan</span>
+cd firmware &amp;&amp; make        <span class="c"># static aarch64 binary via zig cc</span></pre>
+          </div>
+          <div class="term rv">
+            <div class="term-bar"><i></i><i></i><i></i><span>the safe-swap template</span></div>
+<pre>ssh -p 2222 -i ~/.ssh/mpc_sample_client_ed25519 root@192.168.155.1 \
+ 'systemd-run --unit=mpcfw --collect -p RuntimeMaxSec=900 \
+  -p ExecStartPre="/usr/bin/systemctl stop ac50.service" \
+  -p ExecStopPost="/usr/bin/systemctl start ac50.service" \
+  /run/mpcfw "/media/MPC SAMPLE/folder"'
+<span class="c"># systemd stops the stock app, runs yours, and ALWAYS restarts the
+# stock app on exit, crash or time limit</span></pre>
+          </div>
+        </div>
+      </section>
+
+      <section id="patching" class="section">
+        <div class="section-head"><span class="idx">4.7</span><h2 data-decrypt>Patching, boot menu &amp; UI kit</h2></div>
+        <div class="grid g3">
+          <div class="card rv"><h3>mpc-sample-patcher <span class="badge b-experimental">scaffold</span></h3><p class="small">Ships only <b>offsets + bytes</b>, never Akai code. It verifies your stock <code>/usr/bin/MPC Sample</code> by size and SHA-256, patches a copy in <code>/tmp</code>, bind-mounts it over the original, backs off after 2 failed starts, and reboot restores stock. Not yet run on hardware. Explicitly out of scope: code signing, licence or activation checks. <a class="src" data-s="patcher"></a><a class="src" data-s="patcher2"></a></p></div>
+          <div class="card rv"><h3>mpc boot thingy</h3><p class="small">A boot menu so custom firmware and apps can coexist: install several, then pick one from a menu on the device. It includes a small web page for managing entries. <a class="src" data-s="boot"></a><a class="src" data-s="bootvid">VIDEO</a></p></div>
+          <div class="card rv"><h3>mpc-ui-toolkit</h3><p class="small">A C library for the 320×240 panel: boxes, buttons, soft keys (B1–B3 aligned to the top edge), K1–K3 value boxes, lists, a 4×4 pad grid, hold-to-open menus, and a pad multi-tap text editor. Terminus font, about 50 ms per full SPI frame. The examples include <b>Sudoku</b>. <a class="src" data-s="uikit"></a></p></div>
+        </div>
+      </section>
+
+      <section id="protocol" class="section">
+        <div class="section-head"><span class="idx">4.8</span><h2 data-decrypt>Control-surface protocol</h2><p>The pads, buttons and knobs are a separate microcontroller that speaks plain 3-byte MIDI to the Linux side over a 4 Mbit/s UART, which shows up as ALSA rawmidi "Control Surface". It streams events even with the stock app stopped; <b>no handshake needed</b>. <a class="src" data-s="labproto"></a></p></div>
+        <div class="grid g2">
+          <div class="tbl-wrap rv"><table class="data">
+            <thead><tr><th>Input</th><th>Message</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td class="n">Pad hit</td><td><code>99 nn vv</code></td><td>Ch 10 note-on</td></tr>
+              <tr><td class="n">Pad pressure</td><td><code>A9 nn pp</code></td><td>Poly aftertouch, sent on change</td></tr>
+              <tr><td class="n">Pad release</td><td><code>A9 nn 00</code> → <code>89 nn 00</code></td><td></td></tr>
+              <tr><td class="n">Button</td><td><code>90 nn 7F</code> / <code>80 nn 00</code></td><td>Ch 1, 24 inputs</td></tr>
+              <tr><td class="n">MAIN VOLUME</td><td><code>B0 13 vv</code></td><td>CC 19: volume is <b>software</b></td></tr>
+              <tr><td class="n">K1 · K2 · K3</td><td><code>B0 10/11/12 vv</code></td><td>CC 16–18, absolute 0–127</td></tr>
+              <tr><td class="n">Fader</td><td><code>B0 14 vv</code></td><td>CC 20, absolute</td></tr>
+              <tr><td class="n">Encoder</td><td><code>B0 64 01|7F</code></td><td>CC 100 relative: +1 / −1</td></tr>
+            </tbody></table></div>
+          <div class="tbl-wrap rv"><table class="data">
+            <thead><tr><th>Output</th><th>Message</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td class="n">Button LED</td><td><code>B0 &lt;btn note&gt; v</code></td><td>Single: 0 off · 1 dim · ≥2 full. Bi-colour: 0–8 = 3·A + B</td></tr>
+              <tr><td class="n">Pad colour</td><td><code>F0 47 7F 5C 65 00 04 pp RR GG BB F7</code></td><td>7-bit RGB, one pad per message</td></tr>
+              <tr><td class="n">Init?</td><td><code>F0 47 7F 5C 42 00 00 F7</code></td><td>Sent before pad sweeps; purpose unclear</td></tr>
+              <tr><td class="n">Auth</td><td>cmd <code>0x50</code></td><td>XTEA challenge-response; key deliberately unpublished, not needed for your own apps</td></tr>
+              <tr><td class="n">Service</td><td>cmds <code>0x60/0x70–0x73/0x79</code></td><td><b>Do not send</b>: serial / hardware-revision writes</td></tr>
+            </tbody></table></div>
+        </div>
+        <div class="card rv" style="margin-top:6px">
+          <h4>Internal pad notes (ch 10) vs external MIDI</h4>
+          <p class="small">The panel sends the classic MPC drum-note layout; the app remaps it. Over the <b>external/USB MIDI port</b>, pads 1–16 answer <b>36–51</b> instead. <a class="src" data-s="kithw"></a></p>
+          <div class="tbl-wrap"><table class="data" id="notemap"></table></div>
+        </div>
+      </section>
+
+      <section id="sysex" class="section">
+        <div class="section-head"><span class="idx">4.9</span><h2 data-decrypt>Pad colour SysEx builder</h2><p>Pick a pad and a colour to get the exact bytes the panel MCU expects. Useful for your own apps (tier 4). Only meaningful on the internal Control Surface port with the stock app stopped. The external MIDI port belongs to the app.</p></div>
+        <div class="tool rv">
+          <div class="grid g2">
+            <div>
+              <label>Pad</label>
+              <div class="mini-pads" id="sx-pads" role="group" aria-label="Choose a pad"></div>
+            </div>
+            <div>
+              <label for="sx-color">Colour</label>
+              <input type="color" id="sx-color" value="#ff2a00">
+              <label style="margin-top:14px">SysEx (hex)</label>
+              <pre id="sx-out" style="margin-top:4px"></pre>
+              <label>On-device (root, ac50 stopped)</label>
+              <pre id="sx-cmd" style="margin-top:4px"></pre>
+              <p class="small faint">R, G, B are 7-bit (0–127); the MCU expands them to 8-bit as v·2+1. Find the port name with <code>amidi -l</code>. <a class="src" data-s="labproto"></a></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="webmidi" class="section">
+        <div class="section-head"><span class="idx">4.10</span><h2 data-decrypt>Web MIDI pad tester</h2><p>Drive a real MPC Sample from this page. On the device: <span data-keys="SHIFT + PAD 8"></span> → MIDI Port = <b>USB</b>, Pad MIDI In = <b>On</b>. Needs Chrome/Edge; serve the page over <code>localhost</code> or https if MIDI is blocked.</p></div>
+        <div class="tool rv">
+          <div class="grid g2">
+            <div>
+              <button class="btn" id="wm-connect" type="button">Connect MIDI</button>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+                <div><label for="wm-out">Output</label><select id="wm-out" disabled><option>—</option></select></div>
+                <div><label for="wm-ch">Channel</label><select id="wm-ch"></select></div>
+                <div><label for="wm-vel">Velocity</label><input id="wm-vel" type="number" min="1" max="127" value="100" style="width:80px"></div>
+              </div>
+              <label style="margin-top:14px">Pads → notes 36–51</label>
+              <div class="mini-pads" id="wm-pads" role="group" aria-label="Send pad notes"></div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+                <button class="btn ghost" type="button" id="wm-start">Start FA</button>
+                <button class="btn ghost" type="button" id="wm-stop">Stop FC</button>
+                <label for="wm-pc" class="sr-only">Program change</label>
+                <input id="wm-pc" type="number" min="0" max="127" value="0" style="width:70px">
+                <button class="btn ghost" type="button" id="wm-sendpc">Program Δ</button>
+                <button class="btn ghost" type="button" id="wm-panic">All notes off</button>
+              </div>
+              <p class="small faint" style="margin-top:8px">Program change switches sequences when Receive Program Change = Sequence. Start/Stop affect the MPC only when it follows MIDI clock.</p>
+            </div>
+            <div>
+              <label>Monitor (incoming, hex): the MPC echoes what it receives (soft-thru)</label>
+              <pre class="log nocopy" id="wm-log" aria-live="polite">&gt; idle. press Connect MIDI.</pre>
+            </div>
+          </div>
+        </div>
+        <p class="small faint">Hardware behaviour (notes 36–51, port switch, echo) verified by micknoise. Their kit adds a CoreMIDI CLI, a pattern language with Euclidean rhythms and a full Web MIDI app. <a class="src" data-s="kit"></a><a class="src" data-s="kithw"></a></p>
+      </section>
+
+      <section id="xpj" class="section">
+        <div class="section-head"><span class="idx">4.11</span><h2 data-decrypt>Project files &amp; desktop tools</h2></div>
+        <div class="grid g2">
+          <div class="card rv">
+            <h3>Peek inside an .xpj</h3>
+            <p class="small">An MPC Sample project is a <b>gzip-compressed</b> <code>.xpj</code> plus a <code>_[ProjectData]</code> folder of WAVs. MPCTK parses it into project → track → instrument → layer → sample/slice models, and keeps unknown fields intact when it writes. <a class="src" data-s="mpctk"></a></p>
+            <pre>zcat "MyBeat.xpj" | head -c 1200
+python3 -c "import gzip,sys;print(gzip.open(sys.argv[1]).read()[:1200].decode('utf-8','replace'))" MyBeat.xpj</pre>
+            <p class="small">Verified tuning limits on hardware: coarse ±24 semitones, fine ±90. MPCTK refuses banks outside them rather than let the unit clamp silently.</p>
+          </div>
+          <div class="card rv">
+            <h3>Tool rack</h3>
+            <ul class="small">
+              <li><a data-href="mpctk">MPCTK</a>: CLI + macOS app. WAV → chromatic or scale pad banks (major / natural minor) → playable project. <span class="badge b-verified">hw-tested</span></li>
+              <li><a data-href="kitmaker">MPC Sample Kit Maker</a>: browser/Electron kit builder that exports <code>.xpj</code>. <a class="src" data-s="kitmakerApp">LIVE</a></li>
+              <li><a data-href="kit">mpc-sample-kit</a>: algorithmic drums over USB-MIDI, Web MIDI app, latency measurements.</li>
+              <li><a data-href="mpc2live">MPC2Live</a>: MPC projects → Ableton Live Sets. <a class="src" data-s="mpc2liveKofi">DL</a></li>
+              <li><a data-href="converter">Padbangers project converter</a> · <a data-href="padhead">Padhead chopper &amp; kit export</a></li>
+              <li><a data-href="beatos">BeatOS sample database</a> · <a data-href="yt2tw">YT2TW pad chopper</a> · <a data-href="companion">Companion app</a></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="plugins" class="section">
+        <div class="section-head"><span class="idx">4.12</span><h2 data-decrypt>The hidden plugin host</h2></div>
+        <div class="card red rv">
+          <p class="small">The 1.3.0 app binary carries a surprisingly complete <b>MPC/JUCE plugin-host layer</b>: <code>VST_PATH</code>, <code>/usr/lib/vst;/usr/local/lib/vst;~/.vst</code>, <code>VSTPluginMain</code>, plugin-scan strings, <code>EngineVst::loadProgram</code>, <code>ExpansionManager.showVST/showVST3</code>, and engine names like <code>MPC:Bassline</code>, <code>MPC:TubeSynth</code>, <code>FMSynth</code> and <code>GranularSynth</code>. <a class="src" data-s="replug"></a></p>
+          <p class="small"><b>Not proven:</b> that the AC50 UI can reach it without patching feature gates, that the synth binaries are even in the rootfs (they aren't obvious), or that ARMv7 plugins from older MPCs would run on this AArch64 system. Treat it as shared-codebase residue until someone shows otherwise. <span class="badge b-experimental">speculative</span></p>
+        </div>
+      </section>
+
+      <section id="hwmods" class="section">
+        <div class="section-head"><span class="idx">4.13</span><h2 data-decrypt>Hardware mods &amp; accessories</h2></div>
+        <div class="grid g3">
+          <div class="card rv"><h4>3D-printed stand / lid</h4><p class="small">A MakerWorld collection includes an "AKAI MPC SAMPLE – cover – raiser – stand" model. Check the comments for fit before printing. <a class="src" data-s="makerworld"></a></p></div>
+          <div class="card rv"><h4>MIDI adapters</h4><p class="small">You need <b>TRS Type A</b> ↔ 5-pin DIN. Label your adapters; Type B looks identical and won't work. <a class="src" data-s="minimidi"></a></p></div>
+          <div class="card rv"><h4>Field power</h4><p class="small">Any USB-C power bank that holds 5 V / 2 A gets you hours past the internal battery. Some cable/source combos only charge while the unit is off. <a class="src" data-s="man13"></a></p></div>
+          <div class="card rv"><h4>Silent mode</h4><p class="small">Plug anything into PHONES and the speaker mutes; headphone and line detect run on GPIO pins. <a class="src" data-s="labav"></a></p></div>
+          <div class="card rv"><h4>Sibling platform</h4><p class="small">MPC Sample shares inMusic's AZ0x OS with Denon/Engine DJ hardware. That scene has a Yocto BSP, QEMU emulation and test-launcher research, and its techniques often carry over. <a class="src" data-s="openaz0x"></a><a class="src" data-s="qengine"></a><a class="src" data-s="prime4"></a></p></div>
+          <div class="card amber rv"><h4>Open call: teardown</h4><p class="small">No public battery-swap or full teardown photo guide found yet (Oct 2026). If you open one up, document the screws, battery connector and cell spec, and post it to the forum thread.</p></div>
+        </div>
+      </section>
+
+      <nav class="pager" aria-label="Pages">
+        <a href="deep.html"><small>◀ 03</small>Secret Manual</a>
+        <a class="next" href="sources.html"><small>05 ▶</small>The Network: communities, repos, sources</a>
+      </nav>
+    </div>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="foot-in">
+    <div><h4>MPC//SAMPLE SECRET GUIDEBOOK</h4><p>An unofficial, community-sourced living record. Not affiliated with or endorsed by inMusic Brands / Akai Professional. "MPC" and "Akai Professional" are their trademarks. Every claim links to its source; badges show how well it's verified.</p></div>
+    <div><h4>Pages</h4><a href="index.html">01 Cheat Sheet</a><a href="setup.html">02 System Config</a><a href="deep.html">03 Secret Manual</a><a href="hacks.html">04 Underground</a><a href="sources.html">05 Network</a></div>
+    <div><h4>Research credits</h4><a data-href="lab"></a><a data-href="ssh"></a><a data-href="re"></a><a data-href="kit"></a></div>
+    <div class="fine">LAST SYNC <span data-sync="date"></span> · FIRMWARE <span data-sync="build"></span> · credits: briwil78, vinylstyle, puckcv (MPC-Forums) · gospodindilly-ops · jrold · garrettjwilke · micknoise · tarikcampos</div>
+  </div>
+</footer>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var INT = [37, 36, 42, 82, 40, 38, 46, 44, 48, 47, 45, 43, 49, 55, 51, 53];
+  var order = [13, 14, 15, 16, 9, 10, 11, 12, 5, 6, 7, 8, 1, 2, 3, 4];
+  var hex = function (n) { return n.toString(16).toUpperCase().padStart(2, "0"); };
+
+  // note map table
+  var nm = document.getElementById("notemap");
+  nm.innerHTML = "<thead><tr><th>Pad</th>" + INT.map(function (_, i) { return "<th>" + (i + 1) + "</th>"; }).join("") + "</tr></thead><tbody>" +
+    "<tr><td class='n'>panel (ch10)</td>" + INT.map(function (n) { return "<td>" + n + "</td>"; }).join("") + "</tr>" +
+    "<tr><td class='n'>MIDI in</td>" + INT.map(function (_, i) { return "<td>" + (36 + i) + "</td>"; }).join("") + "</tr></tbody>";
+
+  // SysEx builder
+  var sel = 0, sp = document.getElementById("sx-pads"), col = document.getElementById("sx-color");
+  sp.innerHTML = order.map(function (n) { return '<button type="button" data-p="' + (n - 1) + '">' + n + "</button>"; }).join("");
+  function build() {
+    var c = col.value, r = parseInt(c.substr(1, 2), 16) >> 1, g = parseInt(c.substr(3, 2), 16) >> 1, b = parseInt(c.substr(5, 2), 16) >> 1;
+    var bytes = [0xF0, 0x47, 0x7F, 0x5C, 0x65, 0x00, 0x04, sel, r, g, b, 0xF7].map(hex).join(" ");
+    document.getElementById("sx-out").firstChild ? document.getElementById("sx-out").firstChild.nodeValue = bytes : document.getElementById("sx-out").prepend(bytes);
+    var cmd = "amidi -p hw:X,0,0 -S '" + bytes + "'   # X = Control Surface card from amidi -l";
+    document.getElementById("sx-cmd").firstChild ? document.getElementById("sx-cmd").firstChild.nodeValue = cmd : document.getElementById("sx-cmd").prepend(cmd);
+    sp.querySelectorAll("button").forEach(function (x) { x.classList.toggle("sel", +x.dataset.p === sel); x.style.background = +x.dataset.p === sel ? col.value : ""; });
+  }
+  sp.addEventListener("click", function (e) { var t = e.target.closest("button"); if (t) { sel = +t.dataset.p; build(); } });
+  col.addEventListener("input", build);
+  build();
+
+  // Web MIDI tester
+  var access = null, out = null, log = document.getElementById("wm-log"), outSel = document.getElementById("wm-out"), ch = document.getElementById("wm-ch");
+  for (var i = 1; i <= 16; i++) ch.insertAdjacentHTML("beforeend", "<option value='" + (i - 1) + "'>" + i + "</option>");
+  var wp = document.getElementById("wm-pads");
+  wp.innerHTML = order.map(function (n) { return '<button type="button" data-n="' + (35 + n) + '">' + n + "<span>" + (35 + n) + "</span></button>"; }).join("");
+  function say(s) { log.textContent += "\n" + s; log.scrollTop = log.scrollHeight; }
+  function send(bytes) { if (!out) { say("! no output selected"); return; } try { out.send(bytes); } catch (e) { say("! " + e.message); } }
+  function pickOuts() {
+    outSel.innerHTML = ""; var best = null;
+    access.outputs.forEach(function (o) { outSel.insertAdjacentHTML("beforeend", "<option value='" + o.id + "'>" + o.name + "</option>"); if (/mpc sample/i.test(o.name)) best = o.id; });
+    if (!outSel.options.length) { outSel.innerHTML = "<option>no outputs</option>"; out = null; return; }
+    outSel.disabled = false; if (best) outSel.value = best; out = access.outputs.get(outSel.value);
+    say("> output: " + (out ? out.name : "none"));
+  }
+  function listen() {
+    access.inputs.forEach(function (inp) {
+      inp.onmidimessage = function (m) { say("< " + inp.name + ": " + Array.from(m.data).map(hex).join(" ")); };
+    });
+  }
+  document.getElementById("wm-connect").addEventListener("click", function () {
+    if (!navigator.requestMIDIAccess) { say("! Web MIDI not available here: use Chrome/Edge over localhost or https."); return; }
+    navigator.requestMIDIAccess({ sysex: false }).then(function (a) {
+      access = a; say("> MIDI access granted"); pickOuts(); listen();
+      a.onstatechange = function () { pickOuts(); listen(); };
+    }, function (e) { say("! denied: " + (e && e.message ? e.message : e)); });
+  });
+  outSel.addEventListener("change", function () { out = access && access.outputs.get(outSel.value); say("> output: " + (out ? out.name : "none")); });
+  function vel() { return Math.max(1, Math.min(127, +document.getElementById("wm-vel").value || 100)); }
+  function down(e) { var b = e.target.closest("button"); if (!b) return; e.preventDefault(); b.classList.add("hit"); send([0x90 | +ch.value, +b.dataset.n, vel()]); }
+  function up(e) { var b = e.target.closest("button"); if (!b) return; b.classList.remove("hit"); send([0x80 | +ch.value, +b.dataset.n, 0]); }
+  wp.addEventListener("pointerdown", down); wp.addEventListener("pointerup", up); wp.addEventListener("pointerleave", function () { wp.querySelectorAll(".hit").forEach(function (b) { b.classList.remove("hit"); send([0x80 | +ch.value, +b.dataset.n, 0]); }); });
+  document.getElementById("wm-start").addEventListener("click", function () { send([0xFA]); say("> FA start"); });
+  document.getElementById("wm-stop").addEventListener("click", function () { send([0xFC]); say("> FC stop"); });
+  document.getElementById("wm-sendpc").addEventListener("click", function () { var p = Math.max(0, Math.min(127, +document.getElementById("wm-pc").value || 0)); send([0xC0 | +ch.value, p]); say("> program change " + p); });
+  document.getElementById("wm-panic").addEventListener("click", function () { send([0xB0 | +ch.value, 0x7B, 0]); say("> all notes off"); });
+});
+</script>
+</body>
+</html>

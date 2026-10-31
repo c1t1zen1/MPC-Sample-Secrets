@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MPC Sample Secret Manual</title>
+<meta name="description" content="Everything the MPC Sample quick-start never told you: the full shortcut codex, parameter maps, FX encyclopedia, limits, workarounds and recipes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/mpc.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23e4002b'/%3E%3Crect x='6' y='6' width='9' height='9' rx='2' fill='%23ffb000'/%3E%3Crect x='17' y='6' width='9' height='9' rx='2' fill='%23111'/%3E%3Crect x='6' y='17' width='9' height='9' rx='2' fill='%23111'/%3E%3Crect x='17' y='17' width='9' height='9' rx='2' fill='%23111'/%3E%3C/svg%3E">
+<script src="assets/data.js" defer></script>
+<script src="assets/mpc.js" defer></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="index.html"><span class="brand-mark"><i></i><i></i><i></i><i></i></span><span><b>MPC<span>//</span>SAMPLE</b><small>SECRET GUIDEBOOK BIBLE</small></span></a>
+    <nav class="nav" aria-label="Guidebook pages">
+      <a href="index.html"><b>01</b>Cheat Sheet</a>
+      <a href="setup.html"><b>02</b>System Config</a>
+      <a href="deep.html"><b>03</b>Secret Manual</a>
+      <a href="hacks.html"><b>04</b>Underground</a>
+      <a href="sources.html"><b>05</b>Network</a>
+    </nav>
+    <button class="tb-btn" type="button" data-open-search>SEARCH<kbd>⌘K</kbd></button>
+    <button class="tb-btn menu-btn" type="button" aria-expanded="false">MENU</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="kicker"><span class="blink"></span>03 // SECRET MANUAL · WHAT THEY DIDN'T PRINT</div>
+    <h1 class="title glitch" data-text="SECRET MANUAL">Secret <span class="r">Manual</span></h1>
+    <p class="lede">The quick-start covers maybe a third of this machine, and even the full PDF hides gold in footnotes. This page collects it: <strong>every combo in one searchable codex</strong>, every parameter on every page, all 60+ effects, the hard limits and how to get around them, and how the docs changed between revisions.</p>
+  </section>
+
+  <div class="with-toc">
+    <aside class="toc" aria-label="On this page">
+      <b>// ON THIS PAGE</b>
+      <a href="#missed">Never told you</a>
+      <a href="#codex">Shortcut codex</a>
+      <a href="#samplemap">Sample-mode map</a>
+      <a href="#padfx">Pad FX</a>
+      <a href="#knobfx">Knob FX (28)</a>
+      <a href="#flex">Flex Beat &amp; compressor</a>
+      <a href="#limits">Limits &amp; workarounds</a>
+      <a href="#recipes">Recipes</a>
+      <a href="#revisions">Manual diff &amp; conflicts</a>
+      <a href="#timeline">The story so far</a>
+    </aside>
+    <div>
+
+      <section id="missed" class="section" style="padding-top:20px">
+        <div class="section-head"><span class="idx">3.1</span><h2 data-decrypt>What the quick-start never told you</h2><p>Each of these is in the official PDF or release notes, or verified by the community, but buried. Badges show the evidence level.</p></div>
+        <div class="grid g3">
+          <div class="card rv"><h4>Zoom exists</h4><p class="small"><span data-keys="SHIFT + K1"></span><span data-keys="SHIFT + K2"></span><span data-keys="SHIFT + K3"></span> zoom the waveform at Start / End / Loop, in Trim and in Chop. Reviewers missed it because it isn't printed anywhere on the panel. <span class="badge b-official">manual</span> <a class="src" data-s="man13"></a><a class="src" data-s="gearnews"></a></p></div>
+          <div class="card rv"><h4>Chop while you sample</h4><p class="small">During a recording, tapping <b>other pads</b> drops slice markers live. Lazy-chop a record in one pass. <span class="badge b-official">manual</span> <a class="src" data-s="man13"></a></p></div>
+          <div class="card rv"><h4>Two recall buffers</h4><p class="small">Audio input is always being buffered (<span data-keys="SHIFT + SAMPLE RECORD"></span>), and so are your pad hits (<span data-keys="SHIFT + SEQ RECORD"></span>, "MIDI retrospective record"). <span class="badge b-official">manual</span> <a class="src" data-s="man13"></a></p></div>
+          <div class="card rv"><h4>Pad Link</h4><p class="small">Play page <span data-keys="SHIFT + K2"></span>: trigger another pad from the same bank whenever this one fires. Layer a sub under a kick, or melody + break. Bank-local only. <span class="badge b-official">manual</span></p></div>
+          <div class="card rv"><h4>Trigger offset</h4><p class="small">Play page <kbd class="k">K3</kbd> delays sample start after the hit (0–100%). Push snares back for a lazy pocket, or build flams. Automatable. <span class="badge b-official">manual</span></p></div>
+          <div class="card rv"><h4>Decay From Start / End</h4><p class="small"><span data-keys="SHIFT + K2"></span> on Amp/Filter Env. With <b>Decay From Start</b> a looping one-shot fades out on its own, so loops become gated swells. <span class="badge b-official">manual</span></p></div>
+          <div class="card rv"><h4>MPC3000 filter</h4><p class="small">Filter type <b>Classic</b> is modelled on the MPC3000 low-pass and behaves differently with resonance up. Plus LPF/HPF/BPF in 2- and 4-pole. <span class="badge b-official">manual</span></p></div>
+          <div class="card rv"><h4>Vintage file formats</h4><p class="small">The importer reads <code>.snd</code> (MPC2000-era) and <code>.s1s</code>/<code>.s3s</code> (S1000/S3000-era) alongside WAV, AIFF, MP3, FLAC and OGG. Old Akai disk dumps live again. <span class="badge b-official">spec</span> <a class="src" data-s="man13"></a></p></div>
+          <div class="card rv"><h4>Warp = Seq</h4><p class="small">Set Warp (<kbd class="k">K3</kbd>, Tune page) to <b>Seq</b> and give it <b># Beats</b> (<span data-keys="SHIFT + K3"></span>): the loop follows sequence tempo. <span data-keys="SHIFT + PAD 15"></span> flips stretch ↔ re-pitch. <span class="badge b-official">manual</span></p></div>
+          <div class="card rv"><h4>Per-sequence tempo</h4><p class="small">Seq mode <kbd class="k">B2</kbd> toggles <b>SEQ</b> (each sequence keeps its own BPM) and <b>GBL</b> (one tempo). Tempo changes per song section, for free. <span class="badge b-official">manual</span></p></div>
+          <div class="card rv"><h4>Any bar length</h4><p class="small"><kbd class="k">K1</kbd> jumps in powers of two, while <span data-keys="SHIFT + K1"></span> picks any length from 1 to 128. With <span data-keys="SHIFT + K2"></span> time signatures, you get 3-bar phrases in 7/8. <span class="badge b-official">manual</span></p></div>
+          <div class="card rv"><h4>RT swing vs Time Correct</h4><p class="small">Seq <kbd class="k">K3</kbd> swing is <b>live and non-destructive</b>. Time Correct swing is applied with Do It, and its value also swings Note Repeat. <span class="badge b-official">manual</span></p></div>
+          <div class="card rv"><h4>Exclude pads from Knob FX</h4><p class="small">In FX Select, lit pads get the effect and dim pads don't. Put the Pumper on everything but the kick and you've got sidechain without a sidechain input. <span class="badge b-official">manual</span></p></div>
+          <div class="card rv"><h4>Load a kit, skip the beats</h4><p class="small">Project › Load › Kits: <kbd class="k">ENCODER</kbd> push loads the kit with 4 starter sequences; <kbd class="k">B3</kbd> <b>Load Kit</b> loads samples only. <span class="badge b-official">manual</span></p></div>
+          <div class="card rv"><h4>Program Change → sequence</h4><p class="small">MIDI Config › Receive Program Change = <b>Sequence</b>: a foot switch or DAW can change song parts. <span class="badge b-official">manual</span></p></div>
+          <div class="card rv"><h4>Fader LED tells the value</h4><p class="small">Brighter = higher. For Pan/Tune it's brightest at the center. That's how to find the pickup point blind on a dark stage. <span class="badge b-official">manual</span></p></div>
+          <div class="card rv"><h4>LED language</h4><p class="small">Button bright = active · dim = available · off = unavailable. Hold SHIFT: dim red = has a 2nd function, bright red = that function is active. <span class="badge b-official">manual</span></p></div>
+          <div class="card rv"><h4>USB MIDI needs a switch</h4><p class="small">The USB MIDI port appears but stays <b>silent</b> until MIDI Config › MIDI Port = USB. Pads 1–16 answer notes 36–51. <span class="badge b-verified">verified</span> <a class="src" data-s="kithw"></a></p></div>
+          <div class="card rv"><h4>Export Song → Sequence</h4><p class="small">Since 1.2 a whole arrangement can become <b>one long sequence</b>, so you can record FX moves and automation across the full song. <span class="badge b-official">1.2</span> <a class="src" data-s="rn12"></a></p></div>
+          <div class="card rv"><h4>Attack default changed</h4><p class="small">Since 1.3, fresh recordings get Amp Attack <b>2</b> instead of 0 (kills clicks). If your old chops click, that's why. <span class="badge b-official">1.3</span> <a class="src" data-s="rn13"></a></p></div>
+          <div class="card rv"><h4>Live FX on a synth</h4><p class="small">Input Config › Monitor <b>On</b> plus <b>Rec Input Effects</b> prints Knob FX while sampling: Amp Sim on a drum machine, Tape Delay on vocals. <span class="badge b-official">manual</span></p></div>
+        </div>
+      </section>
+
+      <section id="codex" class="section">
+        <div class="section-head"><span class="idx">3.2</span><h2 data-decrypt>The shortcut codex</h2><p>Every combo we could source, in one table. Filter by context, flip to <b>Hidden gems</b>, or type (try <code>recall</code>, <code>zoom</code>, <code>bank</code>). The ⌘K search covers the same data from any page.</p></div>
+        <input class="filter-input" id="codex-q" type="search" placeholder="filter combos…" aria-label="Filter combos">
+        <div class="filters" id="codex-filters" role="group" aria-label="Context filter"></div>
+        <p class="faint small mono" id="codex-count"></p>
+        <div class="tbl-wrap" id="codex-table"></div>
+      </section>
+
+      <section id="samplemap" class="section">
+        <div class="section-head"><span class="idx">3.3</span><h2 data-decrypt>Sample-mode parameter map</h2><p><kbd class="k">B1</kbd> / <kbd class="k">B2</kbd> / <kbd class="k">B3</kbd> cycle pages. Push the <kbd class="k">ENCODER</kbd> to focus a parameter and fine-tune with <kbd class="k">−</kbd>/<kbd class="k">+</kbd>.</p></div>
+        <div class="tbl-wrap rv"><table class="data">
+          <thead><tr><th>Button</th><th>Page</th><th>K1</th><th>K2</th><th>K3</th><th>Hidden (SHIFT)</th></tr></thead>
+          <tbody>
+            <tr><td class="n">B1</td><td><b>Trim</b></td><td>Start 0–100%</td><td>End</td><td>Loop point</td><td>SHIFT+K1/K2/K3 zoom · SHIFT+B1 Loop Lock · SHIFT+B2 Normalize</td></tr>
+            <tr><td class="n">B1</td><td><b>Mix</b></td><td>Volume −∞…+6 dB</td><td>—</td><td>Pan 50L–C–50R</td><td>SHIFT+K2 Kit Volume</td></tr>
+            <tr><td class="n">B1</td><td><b>Amp Env</b></td><td>Attack 0–127</td><td>Decay (one-shot) / Release (Note On)</td><td>Vel Sens 0–127</td><td>SHIFT+K2 Decay From Start/End</td></tr>
+            <tr><td class="n">B2</td><td><b>Tune</b></td><td>Semi ±24</td><td>Fine ±90 cents</td><td>Warp Off · 50–200% · Seq</td><td>SHIFT+K3 # Beats · SHIFT+PAD 15 stretch↔pitch</td></tr>
+            <tr><td class="n">B2</td><td><b>Play</b></td><td>Polyphony Mono/Poly</td><td>Mute Group Off/1–16</td><td>Offset 0–100%</td><td>SHIFT+K2 Pad Link Off/1–16</td></tr>
+            <tr><td class="n">B3</td><td><b>Filter</b></td><td>Cutoff 0–127</td><td>Reso 0–127</td><td>Off · Classic · LPF2/4 · HPF2/4 · BPF2/4</td><td>—</td></tr>
+            <tr><td class="n">B3</td><td><b>Filt Env</b></td><td>Attack</td><td>Decay / Release</td><td>Depth 0–127</td><td>SHIFT+K2 Decay From</td></tr>
+            <tr><td class="n">CHOP</td><td><b>Chop</b> (replaces Trim)</td><td>Slice Start</td><td>Slice End</td><td>Type: Threshold · Regions 4/8/16 · Manual</td><td>SHIFT+K1/K2 zoom · SHIFT+K3 Threshold · SHIFT+B1 Extract · B2 Split · B3 Merge</td></tr>
+          </tbody></table></div>
+        <div class="callout info small rv"><b>What can be automated</b>Record knob/fader moves while SEQ RECORD is running: Volume, Tuning, Pan, Amp and Filter envelope parameters (not Decay From), Velocity Sensitivity and Offset. Knob FX and Pad FX tweaks can be recorded too, per Akai's FAQ. Erase a lane with <span data-keys="hold:ERASE + K1–K3"></span>. <a class="src" data-s="man13"></a><a class="src" data-s="faq"></a></div>
+      </section>
+
+      <section id="padfx" class="section">
+        <div class="section-head"><span class="idx">3.4</span><h2 data-decrypt>Pad FX: 16 pressure effects</h2><p><kbd class="k">PAD FX</kbd>, then pads 1–16. Harder press = more effect (poly aftertouch). Four can run at once; a fifth bypasses the oldest until you let it go. <kbd class="k">B1</kbd> latches the current amount. They hit the <b>whole mix</b>.</p></div>
+        <div class="tbl-wrap rv" id="padfx-table"></div>
+        <p class="small faint">Source: User Guide v1.3.0, Pad FX table <a class="src" data-s="man13"></a>. Filter pads 6–8 have their own tempo-synced LFO (Speed + Range).</p>
+      </section>
+
+      <section id="knobfx" class="section">
+        <div class="section-head"><span class="idx">3.5</span><h2 data-decrypt>Knob FX: the 28-effect rack</h2><p>One at a time, on the pads you choose. <span data-keys="SHIFT + KNOB FX"></span> to pick, <kbd class="k">KNOB FX</kbd> to drive with K1–K3; hold SHIFT for the second row of parameters.</p></div>
+        <div class="tbl-wrap rv" id="knobfx-table"></div>
+        <p class="small faint">Source: User Guide v1.3.0, Knob FX table <a class="src" data-s="man13"></a>. MPC 3.8 ported several of these (Color compressor, tape &amp; vinyl emulators, vintage emulation) to the big MPCs <a class="src" data-s="synth38"></a>.</p>
+      </section>
+
+      <section id="flex" class="section">
+        <div class="section-head"><span class="idx">3.6</span><h2 data-decrypt>Flex Beat &amp; the Color compressor</h2></div>
+        <div class="grid g2">
+          <div class="card rv">
+            <h3>Flex Beat</h3>
+            <p class="small"><span data-keys="SHIFT + PAD FX"></span>. Sixteen slots of time-based mangling (beat chops, DJ-style scratches, trance gates) applied to the whole sequence while it plays. <b>PAD 1 is the empty, dry slot.</b> Slot names appear on screen; the manual doesn't list them.</p>
+            <table class="data"><tbody>
+              <tr><td class="n">K1</td><td>One Shot (returns to PAD 1 when done) ↔ Loop (repeats until changed)</td></tr>
+              <tr><td class="n">K3</td><td>Dry/Wet 0–100%</td></tr>
+              <tr><td class="n">B3</td><td>Quantize: start on the next division</td></tr>
+            </tbody></table>
+            <p class="small" style="margin-top:8px"><span class="badge b-official">known issue</span> glitches while tempo changes, so go 100% dry first. <a class="src" data-s="rn13"></a></p>
+          </div>
+          <div class="card rv">
+            <h3>Color compressor</h3>
+            <p class="small"><span data-keys="SHIFT + PAD 5"></span>. A "pumping" compressor that also does gentle peak control. Makeup gain is automatic.</p>
+            <table class="data"><tbody>
+              <tr><td class="n">B1</td><td><b>COLOR</b>: parallel bass boost + slight pitch wobble + saturation ("tape warmth")</td></tr>
+              <tr><td class="n">B3</td><td>Bypass / engage</td></tr>
+              <tr><td class="n">K1</td><td>Attack 0.1–150 ms</td></tr>
+              <tr><td class="n">K2</td><td>Release 3–300 ms</td></tr>
+              <tr><td class="n">K3</td><td>Amount 0–100% (threshold + ratio in one)</td></tr>
+              <tr><td class="n">SHIFT+K3</td><td>In Boost: hit it harder</td></tr>
+            </tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <section id="limits" class="section">
+        <div class="section-head"><span class="idx">3.7</span><h2 data-decrypt>Limits &amp; workarounds</h2><p>It's a small box. Here is where you'll hit walls, and the moves the community uses to climb them.</p></div>
+        <div class="tbl-wrap rv"><table class="data">
+          <thead><tr><th>Wall</th><th>Workaround</th><th>Src</th></tr></thead>
+          <tbody>
+            <tr><td>Only <b>one Knob FX</b> at a time</td><td>Print it: <span data-keys="SHIFT + PAD 11"></span> resample with the FX on, then load the next FX. Or print while sampling with Rec Input Effects.</td><td><a class="src" data-s="gearnews"></a><a class="src" data-s="gc"></a></td></tr>
+            <tr><td><b>32 stereo voices</b></td><td>Resample busy loops into one pad; set hats to Mono; use Mute Groups so tails cut.</td><td><a class="src" data-s="man13"></a></td></tr>
+            <tr><td>128 samples, one per pad; <b>can't add a second kit</b></td><td>Start from <b>Load Kit</b> (B3), extract only the slices you need, or pre-build projects on a computer (MPCTK, Kit Maker).</td><td><a class="src" data-s="gearnews"></a><a class="src" data-s="mpctk"></a></td></tr>
+            <tr><td>No keygroups / chromatic instrument</td><td>16 Levels → Tune (PAD 4 = root), or generate scale-mapped pad banks with MPCTK.</td><td><a class="src" data-s="mpctk"></a><a class="src" data-s="padheadKey"></a></td></tr>
+            <tr><td>No "chop to new kit"</td><td><span data-keys="SHIFT + B1"></span> extracts slices one at a time to the next free pads.</td><td><a class="src" data-s="gearnews"></a></td></tr>
+            <tr><td>No stems, no per-track FX routing</td><td>Solo with MUTE and record each part over USB audio into a DAW, or open the project in MPC 3.8+ and mix there.</td><td><a class="src" data-s="musictech"></a><a class="src" data-s="synth38"></a></td></tr>
+            <tr><td>No piano roll</td><td>Step Edit: encoder per step, fader nudges timing, K3 velocity.</td><td><a class="src" data-s="man13"></a></td></tr>
+            <tr><td>Time-stretch can sound rough</td><td>Use Warp mode <b>Pitch</b> for classic re-pitch character, then resample.</td><td><a class="src" data-s="musictech"></a></td></tr>
+            <tr><td>One MIDI out channel</td><td>Sequence one external device, or chain gear with MIDI Thru.</td><td><a class="src" data-s="elek"></a></td></tr>
+            <tr><td>Slice edits can't be undone</td><td>Save the project (or a sample copy) before surgery.</td><td><a class="src" data-s="man13"></a></td></tr>
+            <tr><td>Song→Sequence over 128 bars</td><td>Length becomes uneditable: export shorter sections.</td><td><a class="src" data-s="rn12"></a></td></tr>
+            <tr><td>Tiny speaker, no bass</td><td>Headphones for mixing; the speaker is a sketchpad.</td><td><a class="src" data-s="gearnews"></a></td></tr>
+          </tbody></table></div>
+      </section>
+
+      <section id="recipes" class="section">
+        <div class="section-head"><span class="idx">3.8</span><h2 data-decrypt>Recipes &amp; sound-design tricks</h2></div>
+        <div class="grid g2">
+          <article class="card rv"><h3><span class="num">R1</span>45-RPM pitch trick</h3><p class="small">Old-school sampler move: sample the record at <b>45 RPM</b> (shorter, brighter, more fits in a short buffer), then drop it back down. Tune page <kbd class="k">K1</kbd> semi (−5 ≈ 45→33), or Warp mode <b>Pitch</b>. Finish with Knob FX Vintage Emulator <i>SP1200</i> and filter type <i>Classic</i>.</p></article>
+          <article class="card rv"><h3><span class="num">R2</span>MPC60 swing pocket</h3><p class="small">Record unquantized, then <span data-keys="SHIFT + PAD 14"></span> → <kbd class="k">B2</kbd> all → <kbd class="k">K1</kbd> 1/16 → <kbd class="k">K3</kbd> swing in the high 50s to low 60s % → <kbd class="k">B3</kbd>. Ride Seq <kbd class="k">K3</kbd> for live push. Glue with Vintage Emulator <i>MPC60</i>.</p></article>
+          <article class="card rv"><h3><span class="num">R3</span>Bounce &amp; stack</h3><p class="small">Busy drums + one FX: resample (<span data-keys="SHIFT + PAD 11"></span>) to a pad, clear the source pads, load the next Knob FX, record the next layer. Repeat. It gets around both the 32-voice and one-Knob-FX limits.</p></article>
+          <article class="card rv"><h3><span class="num">R4</span>Always-on jam recorder</h3><p class="small">Input Config: Source <b>Rear</b>, Monitor <b>On</b>. Noodle on your synth all night. When magic happens: <span data-keys="SHIFT + SAMPLE RECORD"></span>. It's on a pad, ready to chop.</p></article>
+          <article class="card rv"><h3><span class="num">R5</span>Granular room tone</h3><p class="small">Sample 20 s of room on <b>Mic</b> → <kbd class="k">LOOP</kbd> + <span data-keys="SHIFT + CHOP"></span> (Note On) → long release. Under it, lean on Pad FX 12 <i>Granulator</i>: pressure is your density fader.</p></article>
+          <article class="card rv"><h3><span class="num">R6</span>Dub-siren throws</h3><p class="small">Knob FX <i>Spring Reverb</i> on the snare only. During playback hit Pad FX 15 <i>Delay</i> (K3 Ping-Pong), <kbd class="k">B1</kbd> latch on the last beat, then unlatch at the drop.</p></article>
+          <article class="card rv"><h3><span class="num">R7</span>Percussion loop lock</h3><p class="small">Shaker loop on a pad → <kbd class="k">LOOP</kbd> → Trim <span data-keys="SHIFT + B1"></span> Loop Lock on. Now moving Start drags the loop with it: scrub the groove without re-aligning.</p></article>
+          <article class="card rv"><h3><span class="num">R8</span>Arrangement-wide FX pass</h3><p class="small">Build Song (<span data-keys="SHIFT + PAD 12"></span>) → <kbd class="k">B1</kbd> → <kbd class="k">B3</kbd> export as sequence → select it → <kbd class="k">SEQ RECORD</kbd> and ride filter / Knob FX across the whole track as one take.</p></article>
+          <article class="card rv"><h3><span class="num">R9</span>Layered kick via Pad Link</h3><p class="small">Kick on pad 1, sub/808 on pad 2. On pad 1's Play page set <span data-keys="SHIFT + K2"></span> Pad Link → 2. Mix each layer separately with its own envelope and filter.</p></article>
+          <article class="card rv"><h3><span class="num">R10</span>16 Levels filter ride</h3><p class="small">Select a stab → <kbd class="k">16 LEVELS</kbd> → <span data-keys="SHIFT + 16 LEVELS"></span> → <i>Filter</i>. Pads 1–8 sweep closed-to-current cutoff, 9–16 current-to-open. Finger-drum a filter riser.</p></article>
+        </div>
+        <p class="small faint">Recipes combine documented functions <a class="src" data-s="man13"></a>. Swing percentages and the 45-RPM trick are classic sampler craft and a matter of taste.</p>
+      </section>
+
+      <section id="revisions" class="section">
+        <div class="section-head"><span class="idx">3.9</span><h2 data-decrypt>Manual revision diff &amp; conflicts</h2><p>We text-diffed every public PDF revision. Here's what changed, and where official sources disagree.</p></div>
+        <div class="tbl-wrap rv"><table class="data">
+          <thead><tr><th>Revision</th><th>Change</th><th>Link</th></tr></thead>
+          <tbody>
+            <tr><td class="n">v1.0</td><td>Launch text. Spec table: "MPC Sample projects can be loaded in MPC3".</td><td><a class="src" data-s="man10">PDF</a></td></tr>
+            <tr><td class="n">v1.0 RevB</td><td>MPC3 line walked back: "Project import and export is not currently supported… upcoming firmware… MPC 3.8 and higher".</td><td><a class="src" data-s="manB">PDF</a></td></tr>
+            <tr><td class="n">v1.0 RevC</td><td>MIDI jacks now specified as <b>TRS Type A</b>. Windows 10 users told to use the desktop updater, not the web page.</td><td><a class="src" data-s="manC">PDF</a></td></tr>
+            <tr><td class="n">v1.3.0 RevA</td><td>Adds Normalize (SHIFT + B2 in Trim) and the Takeover settings (Pickup / Scaled / Instant).</td><td><a class="src" data-s="man13">PDF</a></td></tr>
+          </tbody></table></div>
+        <div class="grid g2">
+          <div class="card rv"><h4><span class="badge b-conflict">conflict</span> Recall length</h4><p class="small">Manual body: last <b>25 s</b> of input. Spec table: "30 seconds of audio or pad performance". Andy Mac also says 25 s. <a class="src" data-s="man13"></a><a class="src" data-s="gc"></a></p></div>
+          <div class="card rv"><h4><span class="badge b-conflict">conflict</span> Battery</h4><p class="small">Manual: ~5 h continuous playback. FAQ: up to 6 h. <a class="src" data-s="man13"></a><a class="src" data-s="faq"></a></p></div>
+          <div class="card rv"><h4><span class="badge b-conflict">conflict</span> MIDI adapter in the box?</h4><p class="small">Manual: TRS→DIN adapters "not included". FAQ: "The included TRS to DIN adapter is Type-A". <a class="src" data-s="manC"></a><a class="src" data-s="faq"></a></p></div>
+          <div class="card rv"><h4><span class="badge b-conflict">conflict</span> FX into the sequence</h4><p class="small">MusicTech's review says effects can't be recorded into a sequence. Akai's FAQ says Knob FX and Pad FX adjustments <i>can</i> be recorded as automation. Test on current firmware. <a class="src" data-s="musictech"></a><a class="src" data-s="faq"></a></p></div>
+        </div>
+      </section>
+
+      <section id="timeline" class="section">
+        <div class="section-head"><span class="idx">3.10</span><h2 data-decrypt>The story so far</h2></div>
+        <div class="tbl-wrap rv"><table class="data">
+          <thead><tr><th>Date</th><th>Event</th><th>Src</th></tr></thead>
+          <tbody>
+            <tr><td class="n">2026-03-24</td><td>MPC Sample launches at $399 and sells out fast. Design nods to the MPC60 / 2000XL.</td><td><a class="src" data-s="dubspot"></a><a class="src" data-s="attack"></a></td></tr>
+            <tr><td class="n">2026-03</td><td>Firmware 1.2.0: SD Card Access, Song → Sequence, Loop Lock.</td><td><a class="src" data-s="rn12"></a></td></tr>
+            <tr><td class="n">2026-04-13</td><td>Firmware 1.3.0: Normalize, Knob Takeover.</td><td><a class="src" data-s="rn13"></a><a class="src" data-s="cdm"></a></td></tr>
+            <tr><td class="n">2026-04-30</td><td>MPC 3.8: big MPCs open Sample projects, export back, and get Sample FX.</td><td><a class="src" data-s="synth38"></a></td></tr>
+            <tr><td class="n">2026-08-08</td><td>micknoise verifies the USB-MIDI pad map (notes 36–51) on hardware and starts driving the Sample from code.</td><td><a class="src" data-s="kithw"></a></td></tr>
+            <tr><td class="n">2026-09-20</td><td>briwil78 opens "MPC Sample (AC50) early firmware/hardware findings" on MPC-Forums.</td><td><a class="src" data-s="forum"></a></td></tr>
+            <tr><td class="n">2026-10-19</td><td>puckcv logs in as root over USB via SD autorun, without flashing anything.</td><td><a class="src" data-s="ssh"></a></td></tr>
+            <tr><td class="n">2026-10-22</td><td>mpc-sample-lab: read-only eMMC backup, panel protocol verified, first custom Sample-Mode firmware running from RAM.</td><td><a class="src" data-s="lab"></a></td></tr>
+            <tr><td class="n">2026-10-26</td><td>Boot-menu and UI-toolkit projects appear for running multiple custom apps. You are here.</td><td><a class="src" data-s="boot"></a><a class="src" data-s="uikit"></a></td></tr>
+          </tbody></table></div>
+      </section>
+
+      <nav class="pager" aria-label="Pages">
+        <a href="setup.html"><small>◀ 02</small>System Config</a>
+        <a class="next" href="hacks.html"><small>04 ▶</small>The Underground: mods, hacks &amp; dev</a>
+      </nav>
+    </div>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="foot-in">
+    <div><h4>MPC//SAMPLE SECRET GUIDEBOOK</h4><p>An unofficial, community-sourced living record. Not affiliated with or endorsed by inMusic Brands / Akai Professional. "MPC" and "Akai Professional" are their trademarks. Every claim links to its source; badges show how well it's verified.</p></div>
+    <div><h4>Pages</h4><a href="index.html">01 Cheat Sheet</a><a href="setup.html">02 System Config</a><a href="deep.html">03 Secret Manual</a><a href="hacks.html">04 Underground</a><a href="sources.html">05 Network</a></div>
+    <div><h4>Primary sources</h4><a data-href="man13"></a><a data-href="rn12"></a><a data-href="rn13"></a><a data-href="gearnews"></a></div>
+    <div class="fine">LAST SYNC <span data-sync="date"></span> · FIRMWARE <span data-sync="build"></span> · MANUAL <span data-sync="manual"></span> · press / or ⌘K to search everything</div>
+  </div>
+</footer>
+</body>
+</html>

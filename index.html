@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MPC Sample Secret Guidebook</title>
+<meta name="description" content="The MPC Sample Secret Guidebook Bible: a one-page cheat sheet with every control mapped, flow-state recipes and the SHIFT layer.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/mpc.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23e4002b'/%3E%3Crect x='6' y='6' width='9' height='9' rx='2' fill='%23ffb000'/%3E%3Crect x='17' y='6' width='9' height='9' rx='2' fill='%23111'/%3E%3Crect x='6' y='17' width='9' height='9' rx='2' fill='%23111'/%3E%3Crect x='17' y='17' width='9' height='9' rx='2' fill='%23111'/%3E%3C/svg%3E">
+<script src="assets/data.js" defer></script>
+<script src="assets/mpc.js" defer></script>
+<script src="assets/panel.js" defer></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="index.html"><span class="brand-mark"><i></i><i></i><i></i><i></i></span><span><b>MPC<span>//</span>SAMPLE</b><small>SECRET GUIDEBOOK BIBLE</small></span></a>
+    <nav class="nav" aria-label="Guidebook pages">
+      <a href="index.html"><b>01</b>Cheat Sheet</a>
+      <a href="setup.html"><b>02</b>System Config</a>
+      <a href="deep.html"><b>03</b>Secret Manual</a>
+      <a href="hacks.html"><b>04</b>Underground</a>
+      <a href="sources.html"><b>05</b>Network</a>
+    </nav>
+    <button class="tb-btn" type="button" data-open-search>SEARCH<kbd>⌘K</kbd></button>
+    <button class="tb-btn menu-btn" type="button" aria-expanded="false">MENU</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="kicker"><span class="blink"></span>CLASSIFIED // LIVING RECORD · SYNC <span data-sync="date"></span> · FW <span data-sync="fw"></span></div>
+    <h1 class="title glitch" data-text="MPC SAMPLE SECRET GUIDEBOOK BIBLE">MPC Sample <span class="r">Secret</span><br>Guidebook <span class="o">Bible</span></h1>
+    <p class="lede">The ultimate living record of Akai's mighty tiny machine. <strong>Page 01 is the cheat sheet</strong>: every control on the panel mapped, the whole SHIFT layer, and four flow-state recipes that take you from an empty project to a performed, printed beat. Hover or tap anything. Hold your keyboard <kbd class="k shift">SHIFT</kbd> to flip the panel to its second layer, the way the hardware does.</p>
+    <div class="meta-row">
+      <span class="chip">MODEL <b>AC50</b></span>
+      <span class="chip">LAUNCH <b>24 MAR 2026 · $399</b></span>
+      <span class="chip">FIRMWARE <b data-sync="fw"></b></span>
+      <span class="chip">MANUAL <b data-sync="manual"></b></span>
+      <span class="chip"><b>8×16</b> PADS · <b>32</b> VOICES · <b>60+</b> FX</span>
+      <span class="chip">BATTERY <b>~5 h</b></span>
+    </div>
+  </section>
+
+  <section id="panel" class="section" style="padding-top:12px" data-search="Top panel diagram">
+    <div class="panel-shell">
+      <div class="panel-tools">
+        <button class="shift-toggle" id="shift-toggle" type="button" aria-pressed="false"><span class="cap">SHIFT</span>LAYER: flip every label to its 2nd function</button>
+        <span class="faint small mono">hover any control for its pop-up · click to pin · esc closes · <a href="#" onclick="window.print();return false;">print the one-page sheet</a></span>
+      </div>
+      <div class="panel-stage" id="panel-stage">
+        <div id="panel-host" aria-live="off"></div>
+        <div class="panel-pop" id="panel-pop" role="dialog" aria-label="Control details" aria-hidden="true"></div>
+      </div>
+      <div id="rear" data-search="Rear panel jacks">
+        <div id="rear-host"></div>
+      </div>
+    </div>
+    <p class="faint small mono" style="margin-top:8px">Layout traced from the Features chapter of the official User Guide <a class="src" data-s="man13"></a>. Internal pad notes and panel details come from community reverse engineering <a class="src" data-s="labproto"></a>.</p>
+  </section>
+
+  <section id="flow" class="section">
+    <div class="section-head"><span class="idx">// FLOW STATE</span><h2 data-decrypt>Empty project → performed beat</h2>
+      <p>The four moves you'll do 90% of the time, in the order you'll do them. Each step is the literal button press.</p></div>
+    <div class="grid g2">
+      <article class="card rv">
+        <div class="recipe-head"><span class="glyph">01</span><div><h3>Sample → pads</h3><small>RECORD · TRIM · CHOP</small></div></div>
+        <ol class="flow">
+          <li><kbd class="k">SAMPLE RECORD</kbd> then <kbd class="k">K1</kbd> picks the source: <b>Rear</b> (stereo) · Rear L/R · <b>USB</b> (phone/computer audio) · <b>Mic</b> · <b>Resample</b>. <kbd class="k">K3</kbd> threshold auto-starts on sound; <kbd class="k">K2</kbd> <i>Seq</i> records exactly one sequence length.</li>
+          <li>Tap an empty pad to start. <b>Tap other pads mid-take to drop chop points live.</b> Tap the pad or <kbd class="k">STOP</kbd> to end; <kbd class="k">SAMPLE RECORD</kbd> ends and jumps to the edit page.</li>
+          <li>Missed the moment? <span data-keys="SHIFT + SAMPLE RECORD"></span> recalls the last ~25 s onto the next free pad.</li>
+          <li><kbd class="k">SAMPLE</kbd> → <kbd class="k">K1</kbd>/<kbd class="k">K2</kbd> Start/End, with <span data-keys="SHIFT + K1"></span> to zoom. <span data-keys="SHIFT + B2"></span> normalizes, <span data-keys="SHIFT + PAD 13"></span> trims for good.</li>
+          <li><kbd class="k">CHOP</kbd> → <kbd class="k">K3</kbd> type: <b>Regions 16</b> for loops, <b>Threshold</b> (<span data-keys="SHIFT + K3"></span> sets sensitivity) for breaks, <b>Manual</b> to tap your own. Pads now play slices.</li>
+          <li>Keep the good ones: <span data-keys="SHIFT + B1"></span> extracts a slice to the next free pad.</li>
+          <li>Loading instead? <kbd class="k">SAMPLE SELECT</kbd> → <kbd class="k">B2</kbd> switches to the SD card → <kbd class="k">ENCODER</kbd> turn, then push to load.</li>
+        </ol>
+      </article>
+      <article class="card rv">
+        <div class="recipe-head"><span class="glyph">02</span><div><h3>Record the beat</h3><small>SEQ · TEMPO · TAKE · FIX</small></div></div>
+        <ol class="flow">
+          <li><kbd class="k">SEQ</kbd> → tap a <b>dim</b> pad (empty sequence slot).</li>
+          <li>Hold <kbd class="k">B1</kbd> + turn <kbd class="k">ENCODER</kbd> for BPM (or tap <kbd class="k">TAP TEMPO</kbd>). <kbd class="k">K1</kbd> bars · <kbd class="k">K2</kbd> Q (try 1/16) · <kbd class="k">B3</kbd> record quantize.</li>
+          <li><span data-keys="SHIFT + PAD 4"></span> count-in · <span data-keys="SHIFT + TAP TEMPO"></span> metronome On/Rec.</li>
+          <li><kbd class="k">SEQ RECORD</kbd> → <kbd class="k">PLAY</kbd>. Finger-drum. Hold <kbd class="k">NOTE REPEAT</kbd> for hat rolls (<kbd class="k">B1</kbd>–<kbd class="k">B3</kbd> = rate, SHIFT = triplets). It keeps overdubbing every loop.</li>
+          <li><kbd class="k">SEQ RECORD</kbd> again stops recording but keeps playing; <kbd class="k">STOP</kbd> stops both.</li>
+          <li>Fix it: <span data-keys="SHIFT + −"></span> undoes the whole take · <span data-keys="SHIFT + SEQ RECORD"></span> recalls a jam you played <i>without</i> recording · <span data-keys="SHIFT + PAD 14"></span> → <kbd class="k">B2</kbd> all pads → <kbd class="k">K1</kbd> Q, <kbd class="k">K3</kbd> swing → <kbd class="k">B3</kbd> Do It.</li>
+          <li>Variation: <span data-keys="SHIFT + ERASE + PADS"></span> copies the sequence to new slots; <span data-keys="SHIFT + PAD 3"></span> doubles it before you add the B-part.</li>
+        </ol>
+      </article>
+      <article class="card rv">
+        <div class="recipe-head"><span class="glyph">03</span><div><h3>Perform it with FX</h3><small>QUEUE · MUTE · PAD FX · FLEX · KNOB FX</small></div></div>
+        <ol class="flow">
+          <li><kbd class="k">SEQ</kbd> + <kbd class="k">PLAY</kbd>, then tap pads to queue the next sequence (it flashes until the bar line).</li>
+          <li>Hold <kbd class="k">MUTE</kbd> and tap pads to drop parts (red = muted). Let go to snap back. Works from <b>any</b> mode.</li>
+          <li><kbd class="k">PAD FX</kbd>: press harder for more. Try pad 6 <b>LP Filter</b>, 13 <b>Beat Repeat</b>, 12 <b>Granulator</b>. <kbd class="k">B1</kbd> latches; up to 4 stack.</li>
+          <li><span data-keys="SHIFT + PAD FX"></span> = <b>Flex Beat</b>: pads 2–16 chop, scratch and gate the whole beat; <b>PAD 1 = dry</b>. <kbd class="k">K1</kbd> one-shot ↔ loop, <kbd class="k">K3</kbd> mix.</li>
+          <li><span data-keys="SHIFT + KNOB FX"></span> → pick <b>Pumper</b> or <b>Tape Delay</b> → <kbd class="k">B2</kbd> all pads → <kbd class="k">KNOB FX</kbd> → ride <kbd class="k">K1</kbd>–<kbd class="k">K3</kbd>.</li>
+          <li>Glue: <span data-keys="SHIFT + PAD 5"></span> → <kbd class="k">B1</kbd> COLOR → <kbd class="k">K3</kbd> amount. Live swing: <kbd class="k">K3</kbd> in Seq mode.</li>
+          <li>Train-wreck? <kbd class="k">STOP</kbd><kbd class="k">STOP</kbd> (double-tap) kills every voice.</li>
+        </ol>
+      </article>
+      <article class="card rv">
+        <div class="recipe-head"><span class="glyph">04</span><div><h3>Print &amp; ship it</h3><small>RESAMPLE · SONG · EXPORT · SAVE</small></div></div>
+        <ol class="flow">
+          <li><span data-keys="SHIFT + PAD 11"></span> → tap a pad: the whole sequence, FX and all, becomes one sample. Frees voices and bakes in your one Knob FX.</li>
+          <li><span data-keys="SHIFT + PAD 12"></span> Song: tap a sequence pad → <kbd class="k">B3</kbd> insert → repeat → <kbd class="k">PLAY</kbd>.</li>
+          <li><kbd class="k">B1</kbd> Export → <kbd class="k">B2</kbd> <b>audio mixdown</b> (WAV) or <kbd class="k">B3</kbd> <b>new sequence</b>, so you can perform and automate FX over the full arrangement.</li>
+          <li><span data-keys="SHIFT + PAD 16"></span> → Save Project. Name it with the <kbd class="k">ENCODER</kbd> (SHIFT = caps) → <kbd class="k">B3</kbd> Do It!</li>
+          <li>Move it: Project → <b>SD Card Access</b> → copy over USB → eject on the computer → <kbd class="k">B1</kbd>. It opens in MPC 3.8+.</li>
+        </ol>
+        <div class="callout ok small" style="margin-top:6px"><b>Autosave is on</b>Power off mid-jam and it comes back where you left it. Saving copies the project to a named location, internal or SD.</div>
+      </article>
+    </div>
+  </section>
+
+  <section id="quick" class="section">
+    <div class="section-head"><span class="idx">// QUICK HITS</span><h2 data-decrypt>Panic buttons &amp; power moves</h2></div>
+    <div class="grid g3">
+      <div class="card rv"><h4>Kill everything</h4><p><kbd class="k">STOP</kbd><kbd class="k">STOP</kbd> double-tap stops all audio.</p><p class="small muted">Feedback, runaway loops, a 20-minute sample you hit by accident.</p></div>
+      <div class="card rv"><h4>Time-travel recall</h4><p><span data-keys="SHIFT + SAMPLE RECORD"></span> = last ~25 s of input · <span data-keys="SHIFT + SEQ RECORD"></span> = last loop of pad hits.</p><p class="small muted">It's always listening. Jam first, decide later.</p></div>
+      <div class="card rv"><h4>Silent select</h4><p><span data-keys="hold:SAMPLE + PAD"></span> selects a pad without firing it.</p><p class="small muted">Edit a sample mid-performance without the crowd hearing it.</p></div>
+      <div class="card rv"><h4>Zoom (not on the panel)</h4><p><span data-keys="SHIFT + K1"></span> / <span data-keys="SHIFT + K2"></span> / <span data-keys="SHIFT + K3"></span> zoom at Start / End / Loop.</p><p class="small muted">Reviewers called it the missing feature; it's just hidden.</p></div>
+      <div class="card rv"><h4>Hybrid mode</h4><p><span data-keys="hold:SEQ + SAMPLE"></span> keeps the Seq screen with sample pads.</p><p class="small muted">Watch BPM, Q and bars while you play drums.</p></div>
+      <div class="card rv"><h4>Tempo from anywhere</h4><p><span data-keys="hold:TAP TEMPO + ENCODER"></span> BPM pop-up in any mode.</p><p class="small muted">Push the encoder in BPM windows for decimals.</p></div>
+      <div class="card rv"><h4>Bank teleport</h4><p><span data-keys="hold:PAD BANK + PAD 1–8"></span> jumps to bank A–H.</p><p class="small muted">SHIFT + PAD BANK steps back one.</p></div>
+      <div class="card rv"><h4>Live erase</h4><p><span data-keys="hold:ERASE + hold:PAD"></span> while playing wipes that pad's notes as the playhead passes.</p><p class="small muted">ERASE + a knob kills that knob's automation.</p></div>
+      <div class="card rv red"><h4>Update mode</h4><p>Power on while holding <span data-keys="CHOP + MUTE + SAMPLE SELECT"></span>.</p><p class="small muted">For the desktop updater (Windows 10) and recovery. <a class="src" data-s="fw"></a></p></div>
+    </div>
+    <div class="grid g2" style="margin-top:16px">
+      <div class="card rv">
+        <h4>Battery LED code</h4>
+        <p class="small"><span style="color:var(--green)">■ green</span> 100–30% · <span style="color:var(--amber)">■ amber</span> 29–15% · <span style="color:var(--red-2)">■ red</span> 14–5% · <span style="color:var(--red-2)">▣ blinking red</span> &lt;5%, plug in. Use a 5 V / 2 A USB-C source; with some cables it only charges while powered off. <a class="src" data-s="man13"></a></p>
+      </div>
+      <div class="card rv">
+        <h4>Knob not moving?</h4>
+        <p class="small">Knobs and fader are absolute. Since fw 1.3, knobs default to <b>Scaled</b> takeover and the fader to <b>Pickup</b>. Change it in <span data-keys="SHIFT + PAD 8"></span> → Takeover: Pickup / Scaled / Instant. Fader LED brightness shows the stored value. <a class="src" data-s="rn13"></a></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="shiftpads" class="section">
+    <div class="section-head"><span class="idx">// SHIFT + PADS</span><h2 data-decrypt>The 16 secret buttons</h2><p>Laid out the way they sit on the hardware: pad 1 bottom-left, pad 16 top-right.</p></div>
+    <div class="grid g2">
+      <div class="padgrid rv" id="shiftgrid"></div>
+      <div class="card rv">
+        <h3>Sixty-second flips</h3>
+        <ul class="small">
+          <li><b>SP-1200 dust:</b> <span data-keys="SHIFT + KNOB FX"></span> → <i>Vintage Emulator</i> → <kbd class="k">K1</kbd> SP1200 → <kbd class="k">B2</kbd> all pads. Feather Pad FX 10 <i>LoFi</i> for bitcrush bursts.</li>
+          <li><b>Sidechain without sidechain:</b> Knob FX <i>Pumper</i> at 1/4, then in FX Select tap the <b>kick pad off</b> (dim = unaffected). Everything pumps around the kick.</li>
+          <li><b>Hum a melody:</b> sample yourself on <i>Mic</i> → <span data-keys="SHIFT + B2"></span> normalize → <kbd class="k">16 LEVELS</kbd>, then <span data-keys="SHIFT + 16 LEVELS"></span> until <i>Tune</i>. PAD 4 is the original note.</li>
+          <li><b>Vapor drop:</b> Pad FX 1 <i>Half Speed</i>, <kbd class="k">K1</kbd> x2, <kbd class="k">B1</kbd> latch on the last bar, then <span data-keys="SHIFT + PAD 11"></span> to print it.</li>
+          <li><b>Real hats:</b> closed and open hat on the same <i>Mute Group</i> (Play page, <kbd class="k">K2</kbd>). The closed one chokes the open one.</li>
+          <li><b>Trance-gate breakdown:</b> Flex Beat → <kbd class="k">K1</kbd> Loop → find the gate pad → <kbd class="k">K3</kbd> mix ~70%.</li>
+        </ul>
+        <p class="small faint">More recipes, every FX parameter and the full combo codex are on <a href="deep.html">03 Secret Manual</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section no-print" id="replica">
+    <a class="teaser" href="sources.html#teaser" style="display:block;color:inherit;text-shadow:none">
+      <div class="teaser-in" style="grid-template-columns:minmax(0,1fr) auto;padding:22px 26px">
+        <div>
+          <div class="kicker"><span class="blink"></span>INCOMING · PROJECT 06</div>
+          <h2 style="margin:10px 0 6px">MPC<span style="color:var(--red)">//</span>SAMPLE.WEB</h2>
+          <p class="muted" style="margin:0">A full MPC Sample replica that runs in your browser is in the works. Prototype pads are already live on page 05.</p>
+        </div>
+        <span class="btn">Play the prototype ▶</span>
+      </div>
+    </a>
+  </section>
+
+  <nav class="pager no-print" aria-label="Next page">
+    <a href="sources.html"><small>◀ 05</small>The Network</a>
+    <a class="next" href="setup.html"><small>02 ▶</small>System Config: MIDI, USB, transfer</a>
+  </nav>
+</main>
+
+<footer class="foot">
+  <div class="foot-in">
+    <div><h4>MPC//SAMPLE SECRET GUIDEBOOK</h4><p>An unofficial, community-sourced living record. Not affiliated with or endorsed by inMusic Brands / Akai Professional. "MPC" and "Akai Professional" are their trademarks. Every claim links to its source; badges show how well it's verified.</p></div>
+    <div><h4>Pages</h4><a href="index.html">01 Cheat Sheet</a><a href="setup.html">02 System Config</a><a href="deep.html">03 Secret Manual</a><a href="hacks.html">04 Underground</a><a href="sources.html">05 Network</a></div>
+    <div><h4>Primary sources</h4><a data-href="man13"></a><a data-href="rn13"></a><a data-href="faq"></a><a data-href="forum"></a></div>
+    <div class="fine">LAST SYNC <span data-sync="date"></span> · FIRMWARE <span data-sync="build"></span> · MANUAL <span data-sync="manual"></span> · press / or ⌘K to search everything</div>
+  </div>
+</footer>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var g = document.getElementById("shiftgrid"), order = [13,14,15,16,9,10,11,12,5,6,7,8,1,2,3,4];
+    g.innerHTML = order.map(function (n) { return "<div><b>PAD " + n + "</b><span>" + MPC.SHIFT_PADS[n - 1] + "</span></div>"; }).join("");
+  });
+</script>
+</body>
+</html>

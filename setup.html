@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MPC Sample System Config</title>
+<meta name="description" content="MPC Sample general programming: power, firmware, USB-C modes, MIDI, sync out, sample transfer, MPC 3.8 round-trip and resets.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/mpc.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23e4002b'/%3E%3Crect x='6' y='6' width='9' height='9' rx='2' fill='%23ffb000'/%3E%3Crect x='17' y='6' width='9' height='9' rx='2' fill='%23111'/%3E%3Crect x='6' y='17' width='9' height='9' rx='2' fill='%23111'/%3E%3Crect x='17' y='17' width='9' height='9' rx='2' fill='%23111'/%3E%3C/svg%3E">
+<script src="assets/data.js" defer></script>
+<script src="assets/mpc.js" defer></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="index.html"><span class="brand-mark"><i></i><i></i><i></i><i></i></span><span><b>MPC<span>//</span>SAMPLE</b><small>SECRET GUIDEBOOK BIBLE</small></span></a>
+    <nav class="nav" aria-label="Guidebook pages">
+      <a href="index.html"><b>01</b>Cheat Sheet</a>
+      <a href="setup.html"><b>02</b>System Config</a>
+      <a href="deep.html"><b>03</b>Secret Manual</a>
+      <a href="hacks.html"><b>04</b>Underground</a>
+      <a href="sources.html"><b>05</b>Network</a>
+    </nav>
+    <button class="tb-btn" type="button" data-open-search>SEARCH<kbd>⌘K</kbd></button>
+    <button class="tb-btn menu-btn" type="button" aria-expanded="false">MENU</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="kicker"><span class="blink"></span>02 // SYSTEM CONFIG · MIDI · USB · TRANSFER</div>
+    <h1 class="title glitch" data-text="SYSTEM CONFIG">System <span class="r">Config</span></h1>
+    <p class="lede">The settings you set once and then forget, until something goes silent. Power, firmware, the <strong>five personalities of the USB-C port</strong>, MIDI and clock, getting sounds in and out, and the MPC 3.8 round trip.</p>
+    <div class="legend" style="margin-top:14px">
+      <span class="badge b-official">official</span> Akai docs
+      <span class="badge b-verified">verified</span> tested on hardware by the community
+      <span class="badge b-community">community</span> reported, not lab-tested
+      <span class="badge b-experimental">experimental</span> inference or risky
+      <span class="badge b-conflict">conflict</span> sources disagree
+    </div>
+  </section>
+
+  <div class="with-toc">
+    <aside class="toc" aria-label="On this page">
+      <b>// ON THIS PAGE</b>
+      <a href="#power">Power &amp; battery</a>
+      <a href="#firmware">Firmware &amp; update mode</a>
+      <a href="#usb">USB-C personalities</a>
+      <a href="#midi">MIDI config</a>
+      <a href="#sync">Sync Out / PPQN</a>
+      <a href="#transfer">Sample &amp; project transfer</a>
+      <a href="#mpc3">MPC 3.8 round trip</a>
+      <a href="#input">Input config</a>
+      <a href="#takeover">Knob takeover</a>
+      <a href="#reset">Factory resets</a>
+    </aside>
+    <div>
+
+      <section id="power" class="section" style="padding-top:20px">
+        <div class="section-head"><span class="idx">2.1</span><h2 data-decrypt>Power &amp; battery</h2></div>
+        <div class="facts rv">
+          <div class="fact"><b>5 V · 2 A</b><span>USB-C min source</span></div>
+          <div class="fact"><b>~5 h</b><span>manual · FAQ says 6</span></div>
+          <div class="fact"><b>Li-ion</b><span>internal, rechargeable</span></div>
+          <div class="fact"><b>3 W</b><span>speaker</span></div>
+          <div class="fact"><b>0.92 kg</b><span>2.03 lb</span></div>
+          <div class="fact"><b>19.4×23.6×5</b><span>cm (W×L×H)</span></div>
+        </div>
+        <div class="grid g2" style="margin-top:16px">
+          <div class="card rv">
+            <h3>Charging rules <span class="badge b-official">official</span></h3>
+            <ul class="small">
+              <li>Power and charge over USB-C: wall adapter, power bank, or a computer's USB-C host port. No adapter in the box. <a class="src" data-s="man13"></a></li>
+              <li>The charge icon lights only while charging. It goes dark when unplugged <i>or</i> full.</li>
+              <li><b>Gotcha:</b> depending on the cable and source, it may only charge while powered <b>off</b>. Use the included cable and at least 5 V / 2 A.</li>
+              <li>At full charge on external power it runs from the source and only trickles when off. <a class="src" data-s="faq"></a></li>
+            </ul>
+          </div>
+          <div class="card rv">
+            <h3>Battery LED <span class="badge b-official">official</span></h3>
+            <table class="data"><tbody>
+              <tr><td><span style="color:var(--green)">■ green</span></td><td>100–30%</td></tr>
+              <tr><td><span style="color:var(--amber)">■ amber</span></td><td>29–15%</td></tr>
+              <tr><td><span style="color:var(--red-2)">■ red</span></td><td>14–5%</td></tr>
+              <tr><td><span style="color:var(--red-2)">▣ blinking red</span></td><td>&lt;5%: connect power now</td></tr>
+            </tbody></table>
+            <p class="small muted" style="margin-top:8px">Runtime: <span class="badge b-conflict">conflict</span> the manual says ~5 h of continuous playback, the FAQ says "up to 6 hours". Speaker volume and backlight use change it. Teardown notes report a TI <i>bq</i> fuel-gauge routine in the panel MCU firmware. <a class="src" data-s="labproto"></a></p>
+          </div>
+        </div>
+        <div class="callout info small rv"><b>Speaker logic</b>The built-in speaker switches off when anything is plugged into PHONES or AUDIO OUT, and while the internal Mic is the source with monitoring On/Auto (feedback guard). Silent unit? Check for a forgotten cable. Some 1.3.0 updaters also reported a muted speaker straight after updating. <a class="src" data-s="man13"></a><a class="src" data-s="forum13"></a></div>
+      </section>
+
+      <section id="firmware" class="section">
+        <div class="section-head"><span class="idx">2.2</span><h2 data-decrypt>Firmware &amp; update mode</h2>
+          <p>The unit runs a web server over USB. That's how official updates work, and it's the same door the hackers knock on (see <a href="hacks.html">04</a>).</p></div>
+        <div class="grid g2">
+          <div class="card rv">
+            <h3>Browser updater <span class="badge b-official">official</span></h3>
+            <ol class="flow">
+              <li>Power on, connect USB-C to a computer (or USB-C iPhone/iPad).</li>
+              <li>Open <code>http://mpc-sample.local</code>. If that fails, power-cycle while connected, then try <code>http://192.168.155.1</code>.</li>
+              <li>The page scans your version. Click update and stay connected; it reboots itself.</li>
+              <li>Got a file already? <b>Manual Firmware Upload</b> on the same page. The inMusic Software Center also works.</li>
+            </ol>
+            <p class="small faint">Sources <a class="src" data-s="fw"></a><a class="src" data-s="man13"></a></p>
+          </div>
+          <div class="card red rv">
+            <h3>Update mode (desktop updater) <span class="badge b-official">official</span></h3>
+            <ol class="flow">
+              <li>Power <b>off</b>.</li>
+              <li>Hold <span data-keys="CHOP + MUTE + SAMPLE SELECT"></span> and press <kbd class="k">POWER</kbd>.</li>
+              <li>Connect USB, run the <b>MPC Sample Updater</b> from the downloads page.</li>
+            </ol>
+            <p class="small">Required on <b>Windows 10</b>: the browser updater isn't supported there. Also your fallback when the web page won't come up. <a class="src" data-s="fw"></a><a class="src" data-s="dl"></a></p>
+          </div>
+          <div class="card rv">
+            <h3>iOS &amp; Lightning <span class="badge b-official">official</span></h3>
+            <p class="small">USB-C iPhones/iPads connect directly with the included cable. Lightning devices need Apple's <b>Lightning to USB 3 Camera Adapter</b> with a 20 W USB-C charger on its pass-through, plus a full-data USB-A→USB-C cable to the MPC. <a class="src" data-s="fw"></a></p>
+          </div>
+          <div class="card rv">
+            <h3>Linux &amp; stubborn macOS <span class="badge b-community">community</span></h3>
+            <p class="small">The MPC shows up as a <b>USB network adapter</b> (NCM) at <code>192.168.155.1/28</code> with its own DHCP. <code>.local</code> needs mDNS, so use the IP. Linux users got it working by letting the browser talk only to the MPC's interface (e.g. <code>usb0</code>) in a private window; some Mac users needed the IP too. <a class="src" data-s="forumlinux"></a><a class="src" data-s="manjaro"></a><a class="src" data-s="redev"></a></p>
+            <pre><span class="c"># see the link the MPC creates, then open the updater</span>
+ip addr | grep -A2 192.168.155
+xdg-open http://192.168.155.1/</pre>
+          </div>
+        </div>
+        <h3 style="margin-top:24px">Version timeline</h3>
+        <div class="tbl-wrap rv"><table class="data">
+          <thead><tr><th>Version</th><th>Date</th><th>What landed</th><th>Src</th></tr></thead>
+          <tbody>
+            <tr><td class="n">launch</td><td>24 Mar 2026</td><td>Ships at $399 / £349 / €399. Akai calls the day-one update <b>required</b>.</td><td><a class="src" data-s="dubspot"></a><a class="src" data-s="faq"></a></td></tr>
+            <tr><td class="n">1.2.0</td><td>notes dated 19 Mar 2026</td><td><b>SD Card Access</b> over USB · <b>Export Song → new Sequence</b> (automate FX over a whole arrangement; &gt;128 bars locks length) · <b>Loop Lock per pad</b> (SHIFT + B1 in Trim) · better saving, disk streaming and autosave · fixes: Chop zoom crash on long samples, lazy-chop window, previews over USB audio</td><td><a class="src" data-s="rn12"></a></td></tr>
+            <tr><td class="n">1.2.1</td><td>Spring 2026</td><td>Follow-up maintenance release; no public notes found.</td><td><a class="src" data-s="cdm"></a></td></tr>
+            <tr><td class="n">1.3.0</td><td>13 Apr 2026</td><td><b>Normalize</b> (SHIFT + B2 in Trim) · <b>Knob Takeover</b> modes (SHIFT + PAD 8); knobs/Knob FX now default to Scaled · fixes: attack after recording now 2 (was 0), internal mic recording in stereo after power cycle, Loop Lock not reset on clear, missing "insufficient space" on full SD, shutdown crash with corrupt temp project</td><td><a class="src" data-s="rn13"></a></td></tr>
+            <tr><td class="n">1.3.0.12</td><td>build snapshot 2 Apr 2026</td><td>The full build number found inside the 1.3.0 updater by reverse engineers.</td><td><a class="src" data-s="refw"></a></td></tr>
+          </tbody></table></div>
+        <div class="callout small rv"><b>Known issue (1.2 → 1.3)</b>Flex Beat can glitch while you change tempo. Workaround from Akai: set Flex Beat to 100% dry before touching BPM. <a class="src" data-s="rn13"></a></div>
+      </section>
+
+      <section id="usb" class="section">
+        <div class="section-head"><span class="idx">2.3</span><h2 data-decrypt>The five personalities of USB-C</h2>
+          <p>One port, five jobs. Some can't run at the same time, which explains most "my computer can't see it" moments.</p></div>
+        <div class="tbl-wrap rv"><table class="data">
+          <thead><tr><th>Mode</th><th>How to get it</th><th>Details</th><th>Badge</th></tr></thead>
+          <tbody>
+            <tr><td class="n">Power</td><td>Plug in</td><td>Bus power, wall or power bank. 5 V 2 A recommended.</td><td><span class="badge b-official">official</span></td></tr>
+            <tr><td class="n">Audio I/O</td><td>Input Config / Sample Record source = <b>USB</b>, USB L or USB R</td><td>Stereo in from Mac/Win/iOS/Android, so you can sample a phone app or DAW straight in. Reverse engineers see a UAC2 gadget running 2 ch at 44.1 kHz. Since 1.2, sample previews also play over USB audio. <a class="src" data-s="man13"></a><a class="src" data-s="labav"></a></td><td><span class="badge b-official">official</span></td></tr>
+            <tr><td class="n">MIDI</td><td><span data-keys="SHIFT + PAD 8"></span> → MIDI Port = <b>USB</b></td><td>Class-compliant port named <code>MPC Sample</code> (USB VID <code>0x09E8</code>, PID <code>0x205C</code>). <b>Silent until you switch the port to USB.</b> The device echoes incoming MIDI back out (soft-thru). <a class="src" data-s="kithw"></a></td><td><span class="badge b-verified">verified</span></td></tr>
+            <tr><td class="n">Network</td><td>Automatic when powered on and connected</td><td>USB NCM Ethernet: MPC at <code>192.168.155.1/28</code> with DHCP; web UI at <code>mpc-sample.local</code> (updater; auth disabled in config). <a class="src" data-s="redev"></a><a class="src" data-s="fw"></a></td><td><span class="badge b-verified">verified</span></td></tr>
+            <tr><td class="n">Disk</td><td><span data-keys="SHIFT + PAD 16"></span> → <b>SD Card Access</b></td><td>The microSD mounts on the computer as a drive. While it's mounted, other modes are locked <b>and the USB-MIDI endpoints disappear</b>. Eject on the computer first, then <kbd class="k">B1</kbd>. <a class="src" data-s="man13"></a><a class="src" data-s="kithw"></a></td><td><span class="badge b-verified">verified</span></td></tr>
+          </tbody></table></div>
+        <div class="callout danger small rv"><b>Not a controller for MPC 3</b>Akai says the MPC Sample does <b>not</b> work as a controller for the MPC 3 desktop software. It is still an ordinary class-compliant MIDI device, so any DAW or Web MIDI page can play its pads (and its pads can play things). <a class="src" data-s="faq"></a></div>
+      </section>
+
+      <section id="midi" class="section">
+        <div class="section-head"><span class="idx">2.4</span><h2 data-decrypt>MIDI configuration</h2><p><span data-keys="SHIFT + PAD 8"></span> → turn the <kbd class="k">ENCODER</kbd> to a row, push to edit, push again to confirm.</p></div>
+        <div class="tbl-wrap rv"><table class="data">
+          <thead><tr><th>Setting</th><th>Values</th><th>What it really means</th></tr></thead>
+          <tbody>
+            <tr><td class="n">MIDI Port</td><td>External · USB</td><td>One port at a time. <b>External</b> = the rear 3.5 mm TRS jacks; <b>USB</b> = the class-compliant USB port.</td></tr>
+            <tr><td class="n">MIDI In Channel</td><td>All · 1–16</td><td>Listen to everything or one channel.</td></tr>
+            <tr><td class="n">MIDI Out Channel</td><td>1–16</td><td>The single channel the pads/sequencer transmit on, so it sequences one external device at a time (users note this too). <a class="src" data-s="elek"></a></td></tr>
+            <tr><td class="n">Pad MIDI In</td><td>Off · On</td><td>Let incoming notes trigger pads. On hardware, bank-A pads answer notes <b>36–51</b> (C1 to D#2 in MPC numbering). <a class="src" data-s="kithw"></a></td></tr>
+            <tr><td class="n">Pad MIDI Out</td><td>Never · Always · Empty</td><td>Whether pads send MIDI. <span class="badge b-experimental">inference</span> <b>Empty</b> appears to send only from pads with no sample, so loaded pads play drums while empty pads play an external synth. Test on your unit.</td></tr>
+            <tr><td class="n">MIDI Sync In</td><td>Off · MIDI Clock · MTC</td><td>Follow a DAW or drum machine.</td></tr>
+            <tr><td class="n">MIDI Sync Out</td><td>Off · MIDI Clock · MTC</td><td>Lead other gear.</td></tr>
+            <tr><td class="n">MIDI Thru</td><td>Off · On</td><td>Forward MIDI IN to MIDI OUT (chain gear).</td></tr>
+            <tr><td class="n">Receive Program Change</td><td>Off · Sequence</td><td>Program-change messages <b>launch sequences</b>: a foot controller or DAW clip can switch song parts.</td></tr>
+            <tr><td class="n">CV/Sync Out</td><td>Off · On</td><td>Enable the 3.5 mm SYNC OUT clock (next section).</td></tr>
+            <tr><td class="n">CV/Sync Base</td><td>1–8</td><td>Base clock resolution; 1 = 1 pulse per quarter note.</td></tr>
+            <tr><td class="n">CV/Sync Division</td><td>1–24</td><td>Multiplies the Base.</td></tr>
+            <tr><td class="n">Takeover ×3</td><td>Pickup · Scaled · Instant</td><td>Since 1.3: separate for Parameters, Knob FX and Fader. See <a href="#takeover">2.9</a>.</td></tr>
+            <tr><td class="n">Reset Factory Settings / Data</td><td>B3 Yes · B1 No</td><td>See <a href="#reset">2.10</a>. Data reset is destructive.</td></tr>
+          </tbody></table></div>
+        <p class="small faint">Table source: User Guide v1.3.0 <a class="src" data-s="man13"></a></p>
+        <div class="grid g3">
+          <div class="card rv"><h4>TRS Type A</h4><p class="small">The 3.5 mm MIDI jacks are <b>Type A</b> (spelled out from manual RevC on). Use Type-A TRS↔DIN adapters; a Type-B adapter (Arturia/Novation style) won't work. <span class="badge b-conflict">conflict</span> the manual says adapters aren't included, while the FAQ talks about "the included adapter". Check your box. <a class="src" data-s="manC"></a><a class="src" data-s="faq"></a><a class="src" data-s="minimidi"></a></p></div>
+          <div class="card rv"><h4>Follow a DAW</h4><ol class="small"><li>MIDI Port → USB</li><li>MIDI Sync In → MIDI Clock</li><li>DAW: send clock to "MPC Sample"</li><li>Press PLAY in the DAW</li></ol></div>
+          <div class="card rv"><h4>Lead a drum machine</h4><ol class="small"><li>MIDI Port → External (TRS-A → DIN)</li><li>MIDI Sync Out → MIDI Clock</li><li>MIDI Out Channel = the machine's channel</li><li>PLAY on the MPC</li></ol></div>
+        </div>
+      </section>
+
+      <section id="sync" class="section">
+        <div class="section-head"><span class="idx">2.5</span><h2 data-decrypt>Sync Out &amp; PPQN</h2><p>SYNC OUT is a 3.5 mm TS jack with 5 V clock pulses for modular gear, Volcas and Pocket Operators. Clock only: there's no separate run/stop line.</p></div>
+        <div class="grid g2">
+          <div class="tool rv">
+            <label for="ppqn-base">CV/Sync Base</label>
+            <input id="ppqn-base" type="number" min="1" max="8" value="2">
+            <label for="ppqn-div" style="margin-top:10px">CV/Sync Division</label>
+            <input id="ppqn-div" type="number" min="1" max="24" value="1">
+            <label for="ppqn-bpm" style="margin-top:10px">Tempo (BPM)</label>
+            <input id="ppqn-bpm" type="number" min="30" max="300" value="90">
+            <div class="lcd" id="ppqn-out" style="margin-top:12px" aria-live="polite"></div>
+            <p class="small faint" style="margin-top:8px">Pulses per quarter = Base × Division, per the manual's definition. <a class="src" data-s="man13"></a></p>
+          </div>
+          <div class="tbl-wrap rv"><table class="data">
+            <thead><tr><th>Target</th><th>PPQN</th><th>Base × Div</th></tr></thead>
+            <tbody>
+              <tr><td>Quarter-note clock / clock divider</td><td class="n">1</td><td>1 × 1</td></tr>
+              <tr><td>Korg Volca, Teenage Engineering PO (1 pulse per 8th)</td><td class="n">2</td><td>2 × 1</td></tr>
+              <tr><td>Eurorack 16th-note sequencers</td><td class="n">4</td><td>4 × 1</td></tr>
+              <tr><td>24 PPQN clock inputs</td><td class="n">24</td><td>8 × 3 · 1 × 24</td></tr>
+              <tr><td>48 PPQN clock inputs</td><td class="n">48</td><td>2 × 24</td></tr>
+            </tbody></table>
+            <p class="small faint" style="padding:0 12px 10px">Target rates are common conventions for that gear, not Akai statements; check your device's manual. <span class="badge b-experimental">verify</span></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="transfer" class="section">
+        <div class="section-head"><span class="idx">2.6</span><h2 data-decrypt>Getting sounds in &amp; out</h2></div>
+        <div class="facts rv">
+          <div class="fact"><b>8 GB</b><span>internal (~2 GB factory)</span></div>
+          <div class="fact"><b>2 GB</b><span>RAM</span></div>
+          <div class="fact"><b>128 / 128</b><span>samples / seqs per project</span></div>
+          <div class="fact"><b>20 min</b><span>max per sample</span></div>
+          <div class="fact"><b>24-bit</b><span>44.1 kHz recording</span></div>
+          <div class="fact"><b>32-bit float</b><span>engine</span></div>
+        </div>
+        <div class="grid g2" style="margin-top:16px">
+          <div class="card rv">
+            <h3>Four ways in</h3>
+            <ol class="flow">
+              <li><b>Card reader:</b> copy WAVs to the microSD on your computer. The MPC creates <code>MPC-Sample/Samples</code> on the card. Browse with <kbd class="k">SAMPLE SELECT</kbd> → <kbd class="k">B2</kbd> (External), though you can navigate anywhere on the card.</li>
+              <li><b>SD Card Access</b> (fw 1.2+): <span data-keys="SHIFT + PAD 16"></span> → SD Card Access → drag files over USB → eject → <kbd class="k">B1</kbd>.</li>
+              <li><b>Record over USB audio</b> from a phone, tablet or DAW: source = USB.</li>
+              <li><b>Phone workflow:</b> Andy Mac's tip is to grab samples on a phone (e.g. Splice) and move them onto the SD card. <a class="src" data-s="gc"></a></li>
+            </ol>
+          </div>
+          <div class="card rv">
+            <h3>Formats it eats <span class="badge b-official">official</span></h3>
+            <p class="small"><b>Import:</b> <code>.wav</code> <code>.aif/.aiff</code> <code>.mp3</code> <code>.flac</code> <code>.ogg</code>, plus vintage Akai <code>.snd</code> (MPC2000-era) and <code>.s1s</code>/<code>.s3s</code> (S1000/S3000-era). Files at 16/24-bit and 44.1/48/96 kHz load; the engine runs at 44.1 kHz. <a class="src" data-s="man13"></a></p>
+            <p class="small"><b>Save a sample:</b> <span data-keys="SHIFT + SAMPLE SELECT"></span> → name → <kbd class="k">B3</kbd> Do It.</p>
+            <p class="small"><b>Card format:</b> not specified by Akai. Community tools use <b>exFAT</b> cards without trouble. <span class="badge b-community">community</span> <a class="src" data-s="ssh"></a></p>
+            <p class="small"><b>Projects</b> are an <code>.xpj</code> file plus a matching <code>[ProjectData]</code> folder. Move <b>both</b> or the project won't reopen. <a class="src" data-s="faq"></a><a class="src" data-s="kithw"></a></p>
+          </div>
+        </div>
+        <div class="term rv" style="margin-top:16px">
+          <div class="term-bar"><i></i><i></i><i></i><span>microSD layout (as created by the MPC)</span></div>
+<pre class="nocopy">/  (microSD root)
+├── MPC-Sample/
+│   ├── Samples/        <span class="c">← default browse target for SAMPLE SELECT › B2 (a User/ subfolder shows up in the wild)</span>
+│   └── Projects/       <span class="c">← projects travel as a pair: MyBeat.xpj + MyBeat_[ProjectData]/</span>
+└── anything/you/like/  <span class="c">← the browser can navigate anywhere on the card</span></pre>
+        </div>
+        <p class="small faint">MPC-Sample/Samples is documented <a class="src" data-s="man13"></a>; the Projects and Samples/User folders were observed by community tool builders <a class="src" data-s="kithw"></a><a class="src" data-s="mpctk"></a>.</p>
+      </section>
+
+      <section id="mpc3" class="section">
+        <div class="section-head"><span class="idx">2.7</span><h2 data-decrypt>MPC 3.8 round trip</h2></div>
+        <div class="grid g2">
+          <div class="card amber rv">
+            <h3>What works now <span class="badge b-official">official</span></h3>
+            <ul class="small">
+              <li>MPC Sample projects open on MPC hardware and MPC desktop running <b>3.8+</b> (free update, released 30 Apr 2026). <a class="src" data-s="faq"></a><a class="src" data-s="synth38"></a></li>
+              <li>3.8 can also <b>export tracks back to the MPC Sample</b>. <a class="src" data-s="synth38"></a><a class="src" data-s="djmag38"></a></li>
+              <li>3.8 brings MPC Sample effects to the big MPCs (Color compressor, tape &amp; vinyl emulators, vintage emulation and more).</li>
+              <li><b>Don't</b> push full MPC 3 projects onto the Sample. Akai says not to. <a class="src" data-s="faq"></a></li>
+            </ul>
+          </div>
+          <div class="card rv">
+            <h3>Tricks &amp; history</h3>
+            <ul class="small">
+              <li>Launch manual v1.0 promised MPC 3 loading; RevB walked it back to "not currently supported, coming in a future update"; 3.8 delivered it. <a class="src" data-s="manB"></a></li>
+              <li>Can't see the project data in the MPC 3 browser? Forum users point to the browser's gear menu to unhide <code>[ProjectData]</code> folders. <span class="badge b-community">community</span> <a class="src" data-s="forumbugs"></a></li>
+              <li>Need Ableton? <b>MPC2Live</b> converts MPC projects to Live Sets. <a class="src" data-s="mpc2live"></a></li>
+              <li>A popular video claims you can get MPC <b>Expansion</b> content onto the Sample by way of MPC 3. <span class="badge b-community">unverified</span> <a class="src" data-s="vidExp"></a></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="input" class="section">
+        <div class="section-head"><span class="idx">2.8</span><h2 data-decrypt>Input config</h2><p><span data-keys="SHIFT + SAMPLE"></span>. Most rows mirror the Sample Record page, except <b>Rec Input Effects</b>, which lives only here.</p></div>
+        <div class="tbl-wrap rv"><table class="data">
+          <thead><tr><th>Row</th><th>Options</th><th>Pro move</th></tr></thead>
+          <tbody>
+            <tr><td class="n">Source</td><td>Mic · Rear · Rear L · Rear R · Resample · USB · USB L · USB R</td><td>Two mono synths? Sample them one at a time on Rear L / Rear R without re-patching.</td></tr>
+            <tr><td class="n">Monitor</td><td>Off · Auto · On</td><td><b>On</b> keeps the input audible in every mode, so you can jam over a live synth.</td></tr>
+            <tr><td class="n">Threshold</td><td>−96 … 0 dB</td><td>Auto-start on the first transient: arm it, then drop the needle.</td></tr>
+            <tr><td class="n">Rec Length</td><td>Free · Seq</td><td><b>Seq</b> + playback starts at the next loop and records exactly one sequence: perfect loops.</td></tr>
+            <tr><td class="n">Rec Input Effects</td><td>Off · On</td><td><b>On</b> prints the active Knob FX into the recording: sample through Tape Delay or Amp Sim.</td></tr>
+          </tbody></table></div>
+        <div class="callout small rv"><b>Live FX box</b><span class="badge b-experimental">try it</span> The spec sheet lists "real-time processing of external inputs" and an input FX route. With Monitor On you can push a synth through the MPC's effects live and resample the result. <a class="src" data-s="man13"></a></div>
+      </section>
+
+      <section id="takeover" class="section">
+        <div class="section-head"><span class="idx">2.9</span><h2 data-decrypt>Knob takeover (fw 1.3)</h2></div>
+        <div class="tbl-wrap rv"><table class="data">
+          <thead><tr><th>Mode</th><th>Behaviour</th><th>Default for</th></tr></thead>
+          <tbody>
+            <tr><td class="n">Pickup</td><td>Nothing changes until the knob passes the stored value. Watch for the ◀ ▶ arrows next to the parameter name.</td><td>Fader</td></tr>
+            <tr><td class="n">Scaled</td><td>Moves in your direction at a scaled rate until knob and value meet.</td><td>Parameters, Knob FX</td></tr>
+            <tr><td class="n">Instant</td><td>Jumps straight to the knob position.</td><td>(nothing; great for performance)</td></tr>
+          </tbody></table></div>
+        <p class="small faint">Set separately for Parameters, Knob FX and Fader under <span data-keys="SHIFT + PAD 8"></span>. <a class="src" data-s="rn13"></a><a class="src" data-s="man13"></a></p>
+      </section>
+
+      <section id="reset" class="section">
+        <div class="section-head"><span class="idx">2.10</span><h2 data-decrypt>Factory resets</h2></div>
+        <div class="grid g2">
+          <div class="card rv"><h3>Reset Factory Settings</h3><p class="small">Settings back to default, then restart. Your content stays. <kbd class="k">B3</kbd> Yes · <kbd class="k">B1</kbd> No.</p></div>
+          <div class="card red rv"><h3>Reset Factory Data <span class="risk" data-l="5" title="destructive"><i></i><i></i><i></i><i></i><i></i></span></h3><p class="small">Wipes <b>all internal user content</b>, including the current unsaved project, and restores the factory library. <b>No undo.</b> Copy projects to the SD card first.</p></div>
+        </div>
+        <p class="small faint">Both live at the bottom of <span data-keys="SHIFT + PAD 8"></span>. <a class="src" data-s="man13"></a></p>
+      </section>
+
+      <nav class="pager" aria-label="Pages">
+        <a href="index.html"><small>◀ 01</small>Cheat Sheet</a>
+        <a class="next" href="deep.html"><small>03 ▶</small>Secret Manual: everything they didn't print</a>
+      </nav>
+    </div>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="foot-in">
+    <div><h4>MPC//SAMPLE SECRET GUIDEBOOK</h4><p>An unofficial, community-sourced living record. Not affiliated with or endorsed by inMusic Brands / Akai Professional. "MPC" and "Akai Professional" are their trademarks. Every claim links to its source; badges show how well it's verified.</p></div>
+    <div><h4>Pages</h4><a href="index.html">01 Cheat Sheet</a><a href="setup.html">02 System Config</a><a href="deep.html">03 Secret Manual</a><a href="hacks.html">04 Underground</a><a href="sources.html">05 Network</a></div>
+    <div><h4>Primary sources</h4><a data-href="man13"></a><a data-href="fw"></a><a data-href="faq"></a><a data-href="kithw"></a></div>
+    <div class="fine">LAST SYNC <span data-sync="date"></span> · FIRMWARE <span data-sync="build"></span> · MANUAL <span data-sync="manual"></span> · press / or ⌘K to search everything</div>
+  </div>
+</footer>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var b = document.getElementById("ppqn-base"), d = document.getElementById("ppqn-div"), t = document.getElementById("ppqn-bpm"), o = document.getElementById("ppqn-out");
+    function clamp(el, lo, hi) { var v = Math.round(+el.value || lo); return Math.min(hi, Math.max(lo, v)); }
+    function draw() {
+      var base = clamp(b, 1, 8), div = clamp(d, 1, 24), bpm = Math.min(300, Math.max(30, +t.value || 90));
+      var ppqn = base * div, ms = 60000 / bpm / ppqn, hz = 1000 / ms;
+      var note = { 1: "quarter notes", 2: "8th notes", 3: "8th-note triplets", 4: "16th notes", 6: "16th triplets", 8: "32nd notes", 24: "MIDI-clock rate" }[ppqn] || "custom rate";
+      o.innerHTML = "&gt; PPQN <b>" + ppqn + "</b> · one pulse every <b>" + ms.toFixed(1) + " ms</b> (" + hz.toFixed(2) + " Hz)<br>&gt; = " + note + " at " + bpm + " BPM";
+    }
+    [b, d, t].forEach(function (el) { el.addEventListener("input", draw); });
+    draw();
+  });
+</script>
+</body>
+</html>
