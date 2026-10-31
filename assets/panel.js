@@ -214,13 +214,17 @@
       const xs = c.a.map((p) => p[0] + OX);
       const edge = side === "L" ? L_EDGE : R_EDGE;
       const far = side === "L" ? Math.max(...xs) : Math.min(...xs);
-      path += "M" + far + " " + lanes + " H" + edge + " L" + (side === "L" ? L_END : R_END) + " " + y;
+      path += "M" + far + " " + lanes + " H" + edge;
+      const end = side === "L" ? L_END : R_END;
       const tx = side === "L" ? L_TEXT : R_TEXT, anchor = side === "L" ? "end" : "start";
       const dots = c.a.map(([x, ay]) => '<circle class="dot" cx="' + (x + OX) + '" cy="' + (ay + OY) + '" r="3.4"/>').join("");
-      return '<g class="grp" data-id="' + c.id + '"><path class="lead" d="' + path + '"/>' + dots +
-        '<g class="lbl" data-id="' + c.id + '" tabindex="0" role="button" aria-label="' + esc(c.name) + '"><text class="t1" x="' + tx + '" y="' + (y - 2) + '" text-anchor="' + anchor + '">' + esc(c.name) + "</text>" +
-        '<text class="t2' + (c.shift ? " has" : "") + '" x="' + tx + '" y="' + (y + 13) + '" text-anchor="' + anchor + '">' + (c.shift ? "⇧ " + esc(c.shift) : "") + "</text></g></g>";
+      // the last segment (edge → label) is redrawn by the magnifier as the label moves
+      lines += '<g class="grp" data-id="' + c.id + '"><path class="lead" d="' + path + " L" + end + " " + y + '" data-pre="' + path + '" data-ex="' + end + '"/>' + dots + "</g>";
+      return '<g class="lbl" data-id="' + c.id + '" data-side="' + side + '" data-y="' + y + '" tabindex="0" role="button" aria-label="' + esc(c.name) + '"><rect class="pill" rx="9"/>' +
+        '<text class="t1" x="' + tx + '" y="' + (y - 2) + '" text-anchor="' + anchor + '">' + esc(c.name) + "</text>" +
+        '<text class="t2' + (c.shift ? " has" : "") + '" x="' + tx + '" y="' + (y + 14) + '" text-anchor="' + anchor + '">' + (c.shift ? "⇧ " + esc(c.shift) : "") + "</text></g>";
     };
+    let lines = "";
     L.forEach((it) => (s += label(it, "L")));
     R.forEach((it) => (s += label(it, "R")));
     // top group (B1..B3)
@@ -231,9 +235,104 @@
     p += "M" + (b.a[0][0] + OX) + " " + by + " H" + (b.a[2][0] + OX);
     const cx = b.a[1][0] + OX;
     p += "M" + cx + " " + by + " V" + (by - 8);
-    s += '<g class="grp" data-id="bbtns"><path class="lead" d="' + p + '"/>' + b.a.map(([x, y]) => '<circle class="dot" cx="' + (x + OX) + '" cy="' + (y + OY) + '" r="4"/>').join("") +
-      '<g class="lbl" data-id="bbtns" tabindex="0" role="button" aria-label="B1 B2 B3"><text class="t1" x="' + cx + '" y="' + (by - 26) + '" text-anchor="middle">' + esc(b.name) + '</text><text class="t2 has" x="' + cx + '" y="' + (by - 12) + '" text-anchor="middle">' + esc(b.shift) + "</text></g></g>";
-    return s;
+    lines += '<g class="grp" data-id="bbtns"><path class="lead" d="' + p + '"/>' + b.a.map(([x, y]) => '<circle class="dot" cx="' + (x + OX) + '" cy="' + (y + OY) + '" r="4"/>').join("") + "</g>";
+    s += '<g class="lbl" data-id="bbtns" tabindex="0" role="button" aria-label="B1 B2 B3"><text class="t1" x="' + cx + '" y="' + (by - 26) + '" text-anchor="middle">' + esc(b.name) + '</text><text class="t2 has" x="' + cx + '" y="' + (by - 12) + '" text-anchor="middle">' + esc(b.shift) + "</text></g>";
+    return { lines, labels: s };
+  }
+
+  /* ---------- dock-style label magnifier ----------
+     Labels near the focus point grow and spread apart; the column ends stay put.
+     Spacing follows the integral of a gaussian scale bump, so neighbours never pile up. */
+  function erf(x) {
+    const sg = Math.sign(x), a = Math.abs(x), t = 1 / (1 + 0.3275911 * a);
+    return sg * (1 - ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-a * a));
+  }
+  function magnifier(base, over) {
+    const list = Array.from(over.querySelectorAll(".lbl[data-side]")).map((g) => {
+      const lead = base.querySelector('.grp[data-id="' + g.dataset.id + '"] .lead');
+      const y = +g.dataset.y;
+      return { g, id: g.dataset.id, side: g.dataset.side, y, t1: g.querySelector(".t1"), t2: g.querySelector(".t2"), pill: g.querySelector(".pill"),
+        lead, pre: lead.dataset.pre, ex: +lead.dataset.ex, s: 1, ny: y, ts: 1, ty: y, w1: 0, w2: 0 };
+    });
+    const cols = { L: list.filter((l) => l.side === "L").sort((a, b) => a.y - b.y), R: list.filter((l) => l.side === "R").sort((a, b) => a.y - b.y) };
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let mobile = false, raf = 0, raised = null, focused = null;
+    // label box in its own unscaled units, relative to its row y; the SHIFT line only shows on the focused label on phones
+    const showT2 = (l) => l.w2 > 0 && (!mobile || l === focused);
+    const boxOf = (l) => ({ top: mobile ? -24 : -17, bot: showT2(l) ? (mobile ? 21 : 19) : (mobile ? 8 : 5) });
+
+    function target(side, fy) {
+      const col = cols[side];
+      const M = mobile ? 3.2 : 1.9, sig = mobile ? 70 : 55, k = Math.sqrt(Math.PI) / 2;
+      const y0 = col[0].y, y1 = col[col.length - 1].y;
+      const F = (y) => y - y0 + (M - 1) * sig * k * (erf((y - fy) / sig) - erf((y0 - fy) / sig));
+      const tot = F(y1);
+      col.forEach((l) => { l.ts = 1 + (M - 1) * Math.exp(-Math.pow((l.y - fy) / sig, 2)); l.ty = y0 + (F(l.y) / tot) * (y1 - y0); });
+      focused = nearest(side, fy);
+      // push neighbours out from the focused label using real (scaled) heights, so magnified labels never overlap
+      const f = focused ? col.indexOf(focused) : -1;
+      if (f < 0) return;
+      const pad = mobile ? 6 : 4;
+      for (let i = f + 1; i < col.length; i++) {
+        const a = col[i - 1], b = col[i], ba = boxOf(a), bb = boxOf(b);
+        b.ty = Math.max(b.ty, a.ty + a.ts * ba.bot + pad - b.ts * bb.top);
+      }
+      for (let i = f - 1; i >= 0; i--) {
+        const a = col[i + 1], b = col[i], ba = boxOf(a), bb = boxOf(b);
+        b.ty = Math.min(b.ty, a.ty + a.ts * ba.top - pad - b.ts * bb.bot);
+      }
+    }
+    function flat(side) { cols[side].forEach((l) => { l.ts = 1; l.ty = l.y; }); }
+    function paint(l) {
+      const hasT2 = showT2(l);
+      const w = Math.max(l.w1, hasT2 ? l.w2 : 0);
+      const tx = l.side === "L" ? L_TEXT : R_TEXT;
+      const room = l.side === "L" ? L_TEXT - 30 : W - R_TEXT - 30;
+      const spill = Math.max(0, l.s * w - room); // too wide for its column: slide over the machine instead of off-screen
+      const dx = l.side === "L" ? spill : -spill;
+      l.g.setAttribute("transform", "translate(" + (tx + dx).toFixed(1) + " " + l.ny.toFixed(1) + ") scale(" + l.s.toFixed(3) + ") translate(" + -tx + " " + -l.y + ")");
+      const bx = boxOf(l), top = l.y + bx.top, bot = l.y + bx.bot;
+      l.pill.setAttribute("x", (l.side === "L" ? tx - w - 9 : tx - 9).toFixed(1));
+      l.pill.setAttribute("y", top);
+      l.pill.setAttribute("width", (w + 18).toFixed(1));
+      l.pill.setAttribute("height", bot - top);
+      l.pill.style.opacity = Math.max(0, Math.min(1, (l.s - 1.12) / 0.45)).toFixed(2);
+      l.t2.style.opacity = mobile ? (hasT2 ? "1" : "0") : "";
+      l.lead.setAttribute("d", l.pre + " L" + l.ex + " " + l.ny.toFixed(1));
+    }
+    function step() {
+      raf = 0;
+      let moving = false;
+      list.forEach((l) => {
+        const ds = l.ts - l.s, dy = l.ty - l.ny;
+        if (!still && (Math.abs(ds) > 0.003 || Math.abs(dy) > 0.15)) { l.s += ds * 0.3; l.ny += dy * 0.3; moving = true; }
+        else { l.s = l.ts; l.ny = l.ty; }
+        paint(l);
+      });
+      if (moving) raf = requestAnimationFrame(step);
+    }
+    const kick = () => { if (!raf) raf = requestAnimationFrame(step); };
+    function nearest(side, fy) {
+      let best = null, d = Infinity;
+      cols[side].forEach((l) => { const dd = Math.abs(l.ty - fy); if (dd < d) { d = dd; best = l; } });
+      return d < (mobile ? 95 : 42) ? best : null;
+    }
+    function raise(l) {
+      if (!l || l === raised) return;
+      raised = l;
+      l.g.parentNode.appendChild(l.g); // draw the focused label above its neighbours
+    }
+    return {
+      focus(side, fy) { target(side, fy); flat(side === "L" ? "R" : "L"); raise(nearest(side, fy)); kick(); },
+      relax() { focused = null; flat("L"); flat("R"); kick(); },
+      nearest,
+      byId: (id) => list.find((l) => l.id === id) || null,
+      measure() {
+        mobile = base.getBoundingClientRect().width < 700;
+        list.forEach((l) => { l.w1 = l.t1.getComputedTextLength(); l.w2 = l.t2.textContent ? l.t2.getComputedTextLength() : 0; });
+        list.forEach(paint);
+      }
+    };
   }
 
   /* ---------- info panel ---------- */
@@ -269,32 +368,42 @@
     return true;
   }
 
-  // Put the pop-up over the machine, beside the control it describes, clamped inside the stage.
+  // The pop-up lives only inside the machine's body (the chassis), so the label columns stay readable.
+  // It sits beside the control when there's room, otherwise over it, and scrolls if it's taller than the body.
+  function chassisBox() {
+    const stage = document.getElementById("panel-stage"), svg = document.getElementById("panel-svg");
+    const sr = stage.getBoundingClientRect(), vr = svg.getBoundingClientRect(), k = vr.width / W, inset = 8;
+    return {
+      l: vr.left - sr.left + (OX + 80) * k + inset, r: vr.left - sr.left + (OX + 820) * k - inset,
+      t: vr.top - sr.top + (OY + 60) * k + inset, b: vr.top - sr.top + (OY + 932) * k - inset
+    };
+  }
   function place(id, pad) {
     const stage = document.getElementById("panel-stage"), box = document.getElementById("panel-pop");
     if (!stage || !box) return;
     const sel = pad ? '#panel-svg .ctl[data-pad="' + pad + '"]' : '#panel-svg .ctl[data-id="' + id + '"]';
     const els = Array.from(document.querySelectorAll(sel));
     if (!els.length) return;
-    const sr = stage.getBoundingClientRect();
+    const sr = stage.getBoundingClientRect(), ch = chassisBox();
     let l = Infinity, t = Infinity, r = -Infinity, b = -Infinity;
     els.forEach((el) => { const q = el.getBoundingClientRect(); l = Math.min(l, q.left); t = Math.min(t, q.top); r = Math.max(r, q.right); b = Math.max(b, q.bottom); });
     l -= sr.left; r -= sr.left; t -= sr.top; b -= sr.top;
-    const W = stage.clientWidth, H = stage.clientHeight, pw = box.offsetWidth, ph = box.offsetHeight, gap = 14;
-    let x, y;
-    if (W < 700) {
-      x = (l + r) / 2 - pw / 2;
-      y = b + gap;
-      if (y + ph > H - 8) y = t - ph - gap;
-    } else {
-      x = (l + r) / 2 < W / 2 ? r + gap : l - pw - gap;
-      y = (t + b) / 2 - ph / 2;
-    }
-    x = Math.max(8, Math.min(W - pw - 8, x));
-    y = Math.max(8, Math.min(H - ph - 8, y));
+    const cw = ch.r - ch.l, chh = ch.b - ch.t, gap = 12;
+    const pw = Math.min(380, cw);
+    box.style.width = Math.round(pw) + "px";
+    box.style.maxHeight = Math.round(chh) + "px";
+    const ph = Math.min(box.scrollHeight, chh);
+    const cx = (l + r) / 2;
+    let x;
+    if (cx < (ch.l + ch.r) / 2) x = r + gap <= ch.r - pw ? r + gap : ch.l + (cw - pw) / 2;
+    else x = l - pw - gap >= ch.l ? l - pw - gap : ch.l + (cw - pw) / 2;
+    x = Math.max(ch.l, Math.min(ch.r - pw, x));
+    let y = (t + b) / 2 - ph / 2;
+    y = Math.max(ch.t, Math.min(ch.b - ph, y));
     box.style.left = Math.round(x) + "px";
     box.style.top = Math.round(y) + "px";
-    box.style.transformOrigin = ((l + r) / 2 < x ? "left" : "right") + " center";
+    box.style.transformOrigin = (cx < x ? "left" : "right") + " center";
+    box.classList.toggle("compact", cw < 420);
     box.classList.add("show");
   }
   function hidePop() {
@@ -305,7 +414,7 @@
   }
 
   function hot(id) {
-    document.querySelectorAll("#panel-svg .grp, #panel-svg .ctl").forEach((g) => g.classList.toggle("hot", g.dataset.id === id));
+    document.querySelectorAll("#panel-svg .grp, #panel-svg .ctl, #panel-labels .lbl").forEach((g) => g.classList.toggle("hot", g.dataset.id === id));
   }
 
   /* ---------- rear panel ---------- */
@@ -351,15 +460,22 @@
   function mount() {
     const host = document.getElementById("panel-host");
     if (!host) return;
+    const art = leaders();
     host.innerHTML = '<svg id="panel-svg" viewBox="0 0 ' + W + " " + H + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="MPC Sample top panel with labelled controls">' +
-      '<g transform="translate(' + OX + "," + OY + ')">' + device() + "</g>" + leaders() + "</svg>";
+      '<g transform="translate(' + OX + "," + OY + ')">' + device() + "</g>" + art.lines + "</svg>" +
+      // labels ride on their own layer above the pop-up, so a magnified label is never hidden by it
+      '<svg id="panel-labels" class="panel-labels" viewBox="0 0 ' + W + " " + H + '" xmlns="http://www.w3.org/2000/svg" aria-label="Control labels">' + art.labels + "</svg>";
     const rh = document.getElementById("rear-host");
     if (rh) rh.innerHTML = rear();
     const svg = document.getElementById("panel-svg");
+    const labelsSvg = document.getElementById("panel-labels");
     const pop = document.getElementById("panel-pop");
-    let pinned = null, cur = null;
+    const stage = document.getElementById("panel-stage");
+    const mag = magnifier(svg, labelsSvg);
+    let pinned = null, cur = null, touching = false, suppressClick = false;
     const pick = (el) => el && el.closest("[data-id]");
     const padOf = (g) => (g.dataset.pad ? +g.dataset.pad : 0);
+    const focusLabel = (id) => { const l = mag.byId(id); if (l) mag.focus(l.side, l.y); else mag.relax(); };
     const peek = (id, pad) => {
       if (pinned || (cur && cur.id === id && cur.pad === pad)) return;
       cur = { id, pad };
@@ -369,11 +485,18 @@
     const pin = (id, pad) => {
       pinned = { id, pad }; cur = pinned;
       hot(id);
+      focusLabel(id);
       if (showInfo(id, pad, true)) place(id, pad);
     };
-    const unpin = () => { pinned = null; cur = null; hot(null); hidePop(); };
-    svg.addEventListener("mouseover", (e) => { const g = pick(e.target); if (g) peek(g.dataset.id, padOf(g)); });
-    svg.addEventListener("mouseleave", () => { if (!pinned) { cur = null; hot(null); hidePop(); } });
+    const unpin = () => { pinned = null; cur = null; hot(null); hidePop(); mag.relax(); };
+    const rest = () => {
+      if (pinned) { hot(pinned.id); focusLabel(pinned.id); return; }
+      cur = null; hot(null); hidePop(); mag.relax();
+    };
+
+    // device controls: hover peeks and magnifies the control's own label; click pins
+    svg.addEventListener("mouseover", (e) => { const g = pick(e.target); if (!g || pinned) return; peek(g.dataset.id, padOf(g)); focusLabel(g.dataset.id); });
+    svg.addEventListener("mouseleave", (e) => { if (e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest(".mag-strip, .panel-pop")) return; rest(); });
     svg.addEventListener("click", (e) => {
       const g = pick(e.target);
       if (!g) { unpin(); return; }
@@ -381,21 +504,67 @@
       if (pinned && pinned.id === id && pinned.pad === pad) { unpin(); return; }
       pin(id, pad);
     });
-    svg.addEventListener("keydown", (e) => {
+
+    // label columns: a strip over each column drives the magnifier (mouse hover, or press-and-drag on touch)
+    const yOf = (e) => { const r = svg.getBoundingClientRect(); return (e.clientY - r.top) * (W / r.width); };
+    ["L", "R"].forEach((side) => {
+      const d = document.createElement("div");
+      d.className = "mag-strip";
+      d.dataset.side = side;
+      d.style.left = side === "L" ? "0" : (R_EDGE / W) * 100 + "%";
+      d.style.width = (L_EDGE / W) * 100 + "%";
+      d.setAttribute("aria-hidden", "true");
+      stage.appendChild(d);
+      const track = (e) => { const y = yOf(e); mag.focus(side, y); return mag.nearest(side, y); };
+      d.addEventListener("pointermove", (e) => {
+        if (e.pointerType === "mouse") { const l = track(e); if (l && !pinned) peek(l.id, 0); }
+        else if (touching) { const l = track(e); if (l) peek(l.id, 0); }
+      });
+      d.addEventListener("pointerleave", (e) => { if (e.pointerType === "mouse") rest(); });
+      d.addEventListener("pointerdown", (e) => {
+        if (e.pointerType === "mouse") return;
+        touching = true;
+        try { d.setPointerCapture(e.pointerId); } catch (_) { /* pointer already gone */ }
+        pinned = null; cur = null; // a new press always previews what's under the finger
+        const l = track(e);
+        if (l) peek(l.id, 0);
+      });
+      d.addEventListener("pointerup", (e) => {
+        if (!touching) return;
+        touching = false;
+        const l = track(e);
+        if (l) pin(l.id, 0); else rest();
+        suppressClick = true;
+        setTimeout(() => { suppressClick = false; }, 450);
+      });
+      d.addEventListener("pointercancel", () => { touching = false; rest(); });
+      d.addEventListener("click", (e) => {
+        if (suppressClick) return;
+        const l = track(e);
+        if (!l) return;
+        if (pinned && pinned.id === l.id) { unpin(); return; }
+        pin(l.id, 0);
+      });
+    });
+
+    // keyboard: labels stay focusable on their own layer
+    labelsSvg.addEventListener("focusin", (e) => { const g = pick(e.target); if (g) { cur = null; peek(g.dataset.id, 0); focusLabel(g.dataset.id); } });
+    labelsSvg.addEventListener("focusout", () => { if (!pinned) rest(); });
+    labelsSvg.addEventListener("keydown", (e) => {
       if (e.key !== "Enter" && e.key !== " ") return;
       const g = pick(e.target);
-      if (g) { e.preventDefault(); pin(g.dataset.id, padOf(g)); }
+      if (g) { e.preventDefault(); pin(g.dataset.id, 0); }
     });
-    svg.addEventListener("focusin", (e) => { const g = pick(e.target); if (g) peek(g.dataset.id, padOf(g)); });
-    svg.addEventListener("focusout", () => { if (!pinned) { cur = null; hidePop(); } });
     if (pop) pop.addEventListener("click", (e) => { if (e.target.closest(".pi-x")) unpin(); });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && pinned) unpin(); });
     document.addEventListener("click", (e) => { if (pinned && !e.target.closest("#panel-stage")) unpin(); });
-    window.addEventListener("resize", () => { if (cur) place(cur.id, cur.pad); });
+    window.addEventListener("resize", () => { mag.measure(); if (cur) place(cur.id, cur.pad); });
+    mag.measure();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => mag.measure());
 
     // SHIFT layer: sticky toggle + hold the real Shift key
     const tg = document.getElementById("shift-toggle");
-    const set = (on) => { document.body.classList.toggle("shift-on", on); if (tg) tg.setAttribute("aria-pressed", String(on)); };
+    const set = (on) => { document.body.classList.toggle("shift-on", on); if (tg) tg.setAttribute("aria-pressed", String(on)); mag.measure(); };
     let sticky = false;
     if (tg) tg.addEventListener("click", () => { sticky = !sticky; set(sticky); });
     const typing = () => /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);

@@ -49,7 +49,7 @@
     <div class="panel-shell">
       <div class="panel-tools">
         <button class="shift-toggle" id="shift-toggle" type="button" aria-pressed="false"><span class="cap">SHIFT</span>LAYER: flip every label to its 2nd function</button>
-        <span class="faint small mono">hover any control for its pop-up · click to pin · esc closes · <a href="#" onclick="window.print();return false;">print the one-page sheet</a></span>
+        <span class="faint small mono">hover or press-and-drag down the labels to magnify · tap a control or label to pin its pop-up · esc closes · <a href="#" onclick="window.print();return false;">print the one-page sheet</a></span>
       </div>
       <div class="panel-stage" id="panel-stage">
         <div id="panel-host" aria-live="off"></div>
@@ -57,6 +57,17 @@
       </div>
       <div id="rear" data-search="Rear panel jacks">
         <div id="rear-host"></div>
+        <ul class="rear-list" aria-label="Rear panel connections">
+          <li><b>PHONES</b><span>3.5 mm TRS. Plugging in mutes the speaker.</span></li>
+          <li><b>SYNC OUT</b><span>3.5 mm TS, 5 V clock pulses. PPQN set in MIDI Config.</span></li>
+          <li><b>MIDI OUT · IN</b><span>3.5 mm TRS <b>Type A</b>. Needs TRS-A ↔ DIN adapters.</span></li>
+          <li><b>AUDIO OUT</b><span>¼″ TRS line outs, L/R.</span></li>
+          <li><b>AUDIO IN</b><span>¼″ TRS mic/line. Rear L or R works mono.</span></li>
+          <li><b>REC GAIN</b><span>Input level for the rear inputs only.</span></li>
+          <li><b>USB-C</b><span>5 V 2 A power · audio · MIDI · SD disk · web updater at 192.168.155.1.</span></li>
+          <li><b>POWER</b><span>Hold to force off if frozen.</span></li>
+          <li><b>microSD</b><span>Left side of the unit.</span></li>
+        </ul>
       </div>
     </div>
     <p class="faint small mono" style="margin-top:8px">Layout traced from the Features chapter of the official User Guide <a class="src" data-s="man13"></a>. Internal pad notes and panel details come from community reverse engineering <a class="src" data-s="labproto"></a>.</p>
